@@ -32,6 +32,7 @@ module.exports = {
 		},
 	},
 	plugins: [
+		require('daisyui'),
 		function ({ addUtilities }) {
 			const newUtilities = {
 				'.rtl': {
@@ -60,4 +61,27 @@ module.exports = {
 	],
 	safelist: [],
 	blocklist: ['fixed', 'columns-1', 'columns-2', 'hidden', 'inline'],
+	daisyui: {
+		themes: [
+			{
+				power: {
+					'color-scheme': 'light',
+					primary: '#377cfb',
+					'primary-content': '#223D30',
+					secondary: '#66cc8a',
+					'secondary-content': '#fff',
+					accent: '#f68067',
+					'accent-content': '#000',
+					neutral: '#333c4d',
+					'neutral-content': '#f9fafb',
+					'base-100': 'oklch(100% 0 0)',
+					'base-content': '#333c4d',
+					'--animation-btn': '0',
+					'--animation-input': '0',
+					'--btn-focus-scale': '1',
+				},
+			},
+		],
+		prefix: 'pc-', // prefix for daisyUI classnames (components, modifiers and responsive class names. Not colors)
+	},
 }

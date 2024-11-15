@@ -23,8 +23,10 @@ final class Bootstrap {
 	 * Constructor
 	 */
 	public function __construct() {
+
 		FrontEnd\Entry::instance();
-		Admin\CPT::instance();
+		Resources\ContractTemplate\Init::instance();
+		Shortcodes\Shortcodes::instance();
 
 		\add_action( 'admin_enqueue_scripts', [ __CLASS__, 'admin_enqueue_script' ], 99 );
 		\add_action( 'wp_enqueue_scripts', [ __CLASS__, 'frontend_enqueue_script' ], 99 );
@@ -50,6 +52,12 @@ final class Bootstrap {
 	 * @return void
 	 */
 	public static function frontend_enqueue_script(): void {
+		global $post;
+		$post_type = $post->post_type;
+		if ( $post_type !== Resources\ContractTemplate\Init::POST_TYPE ) {
+			return;
+		}
+
 		self::enqueue_script();
 	}
 
@@ -61,6 +69,29 @@ final class Bootstrap {
 	 */
 	public static function enqueue_script(): void {
 
+		\wp_enqueue_script(
+			'signature_pad',
+			Plugin::$url . '/inc/assets/js/signature_pad.umd.min.js',
+			[],
+			'5.0.4',
+			false
+		);
+
+		\wp_enqueue_script(
+			'signature_pad_custom',
+			Plugin::$url . '/inc/assets/js/signature_pad_custom.js',
+			[ 'signature_pad', 'jquery' ],
+			Plugin::$version,
+			[
+				'in-footer' => true,
+				'strategy'  => 'async',
+			]
+		);
+
+		$plugin_instance = Plugin::instance();
+		$plugin_instance->add_module_handle( 'signature_pad_custom', 'async' );
+
+		// DELETE 可能不需要REACT
 		Vite\enqueue_asset(
 			Plugin::$dir . '/js/dist',
 			'js/src/main.tsx',

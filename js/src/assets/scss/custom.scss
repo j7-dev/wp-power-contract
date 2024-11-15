@@ -1,0 +1,16 @@
+input,
+div {
+	&.cant_edit {
+		@apply bg-gray-100 pointer-events-none;
+		&::placeholder {
+			@apply opacity-0;
+		}
+	}
+
+	&.can_edit {
+		@apply bg-yellow-100;
+		&::placeholder {
+			@apply opacity-100;
+		}
+	}
+}
