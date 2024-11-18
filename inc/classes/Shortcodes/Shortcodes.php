@@ -27,6 +27,50 @@ final class Shortcodes {
 		'pct_signature',
 	];
 
+
+	/**
+	 * 所有短碼範例
+	 *
+	 * @var array<string, array{shortcode: string, label: string, description: string}>
+	 */
+	public static array $shortcode_examples = [
+		'user_name' => [
+			'shortcode'   => '[pct_input name="user_name"]',
+			'label'       => '姓名輸入框',
+			'description' => '',
+		],
+		'user_address' => [
+			'shortcode'   => '[pct_input name="user_address"]',
+			'label'       => '地址輸入框',
+			'description' => '',
+		],
+		'user_identity' => [
+			'shortcode'   => '[pct_input name="user_identity"]',
+			'label'       => '身分證字號輸入框',
+			'description' => '',
+		],
+		'user_phone' => [
+			'shortcode'   => '[pct_input name="user_phone"]',
+			'label'       => '手機號碼輸入框',
+			'description' => '',
+		],
+		'contract_amount' => [
+			'shortcode'   => '[pct_input name="contract_amount"]',
+			'label'       => '合約金額輸入框',
+			'description' => '',
+		],
+		'pct_seal' => [
+			'shortcode'   => '[pct_seal]',
+			'label'       => '公司章(連動精選圖片)',
+			'description' => '',
+		],
+		'pct_signature' => [
+			'shortcode'   => '[pct_signature]',
+			'label'       => '簽名板',
+			'description' => '',
+		],
+	];
+
 	/**
 	 * Constructor
 	 */
@@ -50,6 +94,8 @@ final class Shortcodes {
 			'name'        => '',
 			'width'       => '160px',
 			'placeholder' => '請輸入',
+			'class'       => '',
+			'id'          => '',
 		];
 
 		$args = \wp_parse_args(
@@ -57,13 +103,23 @@ final class Shortcodes {
 		$default_args,
 		);
 
+		[
+			'name' => $name,
+			'width' => $width,
+			'placeholder' => $placeholder,
+			'class' => $class,
+			'id' => $id,
+		] = $args;
+
 		$html = sprintf(
 		/*html*/'
-		<input type="text" name="%1$s" class="cant_edit py-0.5 px-3 appearance-none outline-none border-none focus:outline-none focus:ring-0 focus:border-none text-[1.125em]" style="width: %2$s;border-bottom: 1px solid #111;" placeholder="%3$s" />
+		<input type="text" name="%1$s" class="cant_edit py-0.5 px-3 appearance-none outline-none border-none focus:outline-none focus:ring-0 focus:border-none text-[1.125em]" style="width: %2$s;border-bottom: 1px solid #111;" placeholder="%3$s" %4$s %5$s />
 		',
-		$args['name'],
-		$args['width'],
-		$args['placeholder']
+		$name,
+		$width,
+		$placeholder,
+		$id ? "id=\"{$id}\"" : '',
+		$class ? "class=\"{$class}\"" : ''
 		);
 
 		return $html;
@@ -85,12 +141,20 @@ final class Shortcodes {
 
 		$default_args = [
 			'style' => 'width: 160px;',
+			'class' => '',
+			'id'    => '',
 		];
 
 		$args = \wp_parse_args(
 		$params,
 		$default_args,
 		);
+
+		[
+			'style' => $style,
+			'class' => $class,
+			'id' => $id,
+		] = $args;
 
 		$src = \get_the_post_thumbnail_url($post->ID, 'full');
 		if (!$src) {
@@ -99,10 +163,12 @@ final class Shortcodes {
 
 		$html = sprintf(
 		/*html*/'
-		<img src="%1$s" style="%2$s" />
+		<img src="%1$s" style="%2$s" %3$s %4$s />
 		',
 		$src,
-		$args['style']
+		$style,
+		$id ? "id=\"{$id}\"" : '',
+		$class ? "class=\"{$class}\"" : ''
 		);
 
 		return $html;
@@ -124,6 +190,8 @@ final class Shortcodes {
 
 		$default_args = [
 			'style' => 'width: 100%;max-width: 480px;aspect-ratio: 16/9;',
+			'class' => '',
+			'id'    => '',
 		];
 
 		$args = \wp_parse_args(
@@ -131,26 +199,34 @@ final class Shortcodes {
 		$default_args,
 		);
 
+		[
+			'style' => $style,
+			'class' => $class,
+			'id' => $id,
+		] = $args;
+
 		$html = sprintf(
 		/*html*/'
-		<div>
-			<div class="pct__signature cant_edit flex justify-center items-center text-2xl font-bold border border-black border-solid cursor-pointer" style="%1$s">簽名</div>
+		<div %1$s %2$s>
+			<div class="pct__signature cant_edit flex justify-center items-center text-2xl font-bold border border-black border-solid cursor-pointer" style="%3$s">簽名</div>
 			<dialog class="pc-modal items-start">
-				<div class="pc-modal-box w-screen max-w-[100vw] h-screen rounded-none">
-					<canvas class="pct__signature-canvas" width="900" height="600"></canvas>
+				<div class="pc-modal-box w-screen max-w-[100vw] h-full rounded-none">
+					<canvas class="pct__signature-canvas"></canvas>
 					<div class="pc-modal-action">
 						<form method="dialog">
 							<button class="pc-btn pc-btn-sm pc-btn-circle pc-btn-ghost absolute right-2 top-2">✕</button>
 							<!-- if there is a button, it will close the modal -->
 							<button class="pc-btn">取消</button>
-							<button class="pct__signature-confirm pc-btn pc-btn-primary">確認簽名</button>
+							<button class="pct__signature-confirm pc-btn pc-btn-primary text-white">確認簽名</button>
 						</form>
 					</div>
 				</div>
 			</dialog>
 		</div>
 		',
-		$args['style']
+		$id ? "id=\"{$id}\"" : '',
+		$class ? "class=\"{$class}\"" : '',
+		$style,
 		);
 
 		return $html;

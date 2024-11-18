@@ -53,14 +53,20 @@ module.exports = {
 					position: 'fixed',
 				},
 				'.tw-inline': {
-					display: 'inline'
-				}
+					display: 'inline',
+				},
 			}
 			addUtilities(newUtilities, ['responsive', 'hover'])
 		},
 	],
 	safelist: [],
-	blocklist: ['fixed', 'columns-1', 'columns-2', 'hidden', 'inline'],
+	blocklist: [
+		'fixed',
+		'columns-1',
+		'columns-2',
+		'hidden',
+		'inline',
+	],
 	daisyui: {
 		themes: [
 			{

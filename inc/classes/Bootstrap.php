@@ -26,9 +26,13 @@ final class Bootstrap {
 
 		FrontEnd\Entry::instance();
 		Resources\ContractTemplate\Init::instance();
+		Resources\Contract\Init::instance();
+		Resources\Contract\Ajax::instance();
 		Shortcodes\Shortcodes::instance();
 
-		\add_action( 'admin_enqueue_scripts', [ __CLASS__, 'admin_enqueue_script' ], 99 );
+		\add_action( 'admin_enqueue_scripts', [ __CLASS__, 'admin_enqueue_script_list_view' ], 99 );
+		\add_action( 'admin_enqueue_scripts', [ __CLASS__, 'admin_enqueue_script_edit_view' ], 100 );
+
 		\add_action( 'wp_enqueue_scripts', [ __CLASS__, 'frontend_enqueue_script' ], 99 );
 	}
 
@@ -40,8 +44,61 @@ final class Bootstrap {
 	 *
 	 * @return void
 	 */
-	public static function admin_enqueue_script( $hook ): void {
-		self::enqueue_script();
+	public static function admin_enqueue_script_list_view( $hook ): void {
+		if ( 'edit.php' !== $hook ) {
+			return;
+		}
+
+		if ( ! \in_array( $_GET['post_type'], [ Resources\Contract\Init::POST_TYPE, Resources\ContractTemplate\Init::POST_TYPE ], true ) ) {
+			return;
+		}
+
+		\wp_enqueue_style(
+			Plugin::$kebab,
+			Plugin::$url . '/js/dist/assets/css/index.css',
+			[],
+			Plugin::$version
+		);
+	}
+
+	/**
+	 * Admin Enqueue script
+	 * You can load the script on demand
+	 *
+	 * @param string $hook current page hook
+	 *
+	 * @return void
+	 */
+	public static function admin_enqueue_script_edit_view( $hook ): void {
+		if ( 'post.php' !== $hook ) {
+			return;
+		}
+		$post_id = $_GET['post']; // phpcs:ignore
+		if ( ! $post_id ) {
+			return;
+		}
+		$post_type = \get_post_type( $post_id );
+		if ( ! \in_array( $post_type, [ Resources\Contract\Init::POST_TYPE, Resources\ContractTemplate\Init::POST_TYPE ], true ) ) {
+			return;
+		}
+
+		\wp_enqueue_style(
+			Plugin::$kebab,
+			Plugin::$url . '/js/dist/assets/css/index.css',
+			[],
+			Plugin::$version
+		);
+
+		\wp_enqueue_script(
+			Plugin::$kebab,
+			Plugin::$url . '/inc/assets/js/admin.js',
+			[ 'jquery' ],
+			Plugin::$version,
+			[
+				'in-footer' => true,
+				'strategy'  => 'async',
+			]
+		);
 	}
 
 
@@ -69,18 +126,18 @@ final class Bootstrap {
 	 */
 	public static function enqueue_script(): void {
 
-		\wp_enqueue_script(
-			'signature_pad',
-			Plugin::$url . '/inc/assets/js/signature_pad.umd.min.js',
+		\wp_enqueue_style(
+			Plugin::$kebab,
+			Plugin::$url . '/js/dist/assets/css/index.css',
 			[],
-			'5.0.4',
-			false
+			Plugin::$version
 		);
 
+		// 自訂 js
 		\wp_enqueue_script(
-			'signature_pad_custom',
-			Plugin::$url . '/inc/assets/js/signature_pad_custom.js',
-			[ 'signature_pad', 'jquery' ],
+			Plugin::$kebab,
+			Plugin::$url . '/js/dist/index.js',
+			[ 'jquery' ],
 			Plugin::$version,
 			[
 				'in-footer' => true,
@@ -89,47 +146,16 @@ final class Bootstrap {
 		);
 
 		$plugin_instance = Plugin::instance();
-		$plugin_instance->add_module_handle( 'signature_pad_custom', 'async' );
-
-		// DELETE 可能不需要REACT
-		Vite\enqueue_asset(
-			Plugin::$dir . '/js/dist',
-			'js/src/main.tsx',
-			[
-				'handle'    => Plugin::$kebab,
-				'in-footer' => true,
-			]
-		);
-
-		$post_id = \get_the_ID();
+		$plugin_instance->add_module_handle( Plugin::$kebab, 'async' );
 
 		\wp_localize_script(
 			Plugin::$kebab,
-			Plugin::$snake . '_data',
+			'signature_pad_custom_data',
 			[
 				'env' => [
-					'siteUrl'       => \untrailingslashit( \site_url() ),
-					'ajaxUrl'       => \untrailingslashit( \admin_url( 'admin-ajax.php' ) ),
-					'userId'        => \get_current_user_id(),
-					'postId'        => $post_id,
-					'APP_NAME'      => Plugin::$app_name,
-					'KEBAB'         => Plugin::$kebab,
-					'SNAKE'         => Plugin::$snake,
-					'BASE_URL'      => Base::BASE_URL,
-					'APP1_SELECTOR' => Base::APP1_SELECTOR,
-					'APP2_SELECTOR' => Base::APP2_SELECTOR,
-					'API_TIMEOUT'   => Base::API_TIMEOUT,
-					'nonce'         => \wp_create_nonce( Plugin::$kebab ),
+					'ajaxUrl' => \untrailingslashit( \admin_url( 'admin-ajax.php' ) ),
+					'nonce'   => \wp_create_nonce( Plugin::$kebab ),
 				],
-			]
-		);
-
-		\wp_localize_script(
-			Plugin::$kebab,
-			'wpApiSettings',
-			[
-				'root'  => \untrailingslashit( \esc_url_raw( rest_url() ) ),
-				'nonce' => \wp_create_nonce( 'wp_rest' ),
 			]
 		);
 	}
