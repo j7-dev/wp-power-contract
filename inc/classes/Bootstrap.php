@@ -20,12 +20,11 @@ final class Bootstrap {
 	 * Constructor
 	 */
 	public function __construct() {
-
-		FrontEnd\Entry::instance();
 		Resources\ContractTemplate\Init::instance();
 		Resources\Contract\Init::instance();
 		Resources\Contract\Ajax::instance();
 		Shortcodes\Shortcodes::instance();
+		Admin\Settings::instance();
 
 		\add_action( 'admin_enqueue_scripts', [ __CLASS__, 'admin_enqueue_script_list_view' ], 99 );
 		\add_action( 'admin_enqueue_scripts', [ __CLASS__, 'admin_enqueue_script_edit_view' ], 100 );

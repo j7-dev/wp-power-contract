@@ -10,8 +10,7 @@ namespace J7\PowerContract\Resources\Contract;
 use J7\PowerContract\Plugin;
 use J7\WpUtils\Classes\WP;
 use J7\WpUtils\Classes\General;
-
-
+use J7\PowerContract\Utils\Base;
 
 if (class_exists('J7\PowerContract\Resources\Contract')) {
 	return;
@@ -70,20 +69,20 @@ final class Ajax {
 			'meta_data' => $meta_data
 		] = WP::separator($post_data, 'post');
 
-		$contract_template_name = \get_the_title( $meta_data['contract_template_id'] );
+		$contract_template_name      = \get_the_title( $meta_data['contract_template_id'] );
 		$meta_data['screenshot_url'] = $img_info['url'];
 
 		$data['meta_input'] = $meta_data;
 		$default_args       = [
-			'post_type'     => Init::POST_TYPE,
-			'post_status'   => 'pending',
-			'post_title'    => sprintf(
+			'post_type'   => Init::POST_TYPE,
+			'post_status' => 'pending',
+			'post_title'  => sprintf(
 			/*html*/'%1$s 合約 - %2$s %3$s',
 			$contract_template_name,
 			$user_name,
 			$user_id ? "對應 user_id: #{$user_id}" : ''
 			),
-			'post_author'   => $user_id,
+			'post_author' => $user_id,
 		];
 
 		$args = \wp_parse_args( $data, $default_args );
@@ -91,10 +90,13 @@ final class Ajax {
 		// insert data
 		\wp_insert_post( $args );
 
+		$title       = Base::get_settings('ajax_signed_title', '已收到您的合約簽屬，等待審閱!');
+		$description = Base::get_settings('ajax_signed_description', '審閱完成後會立即通知您，並為您開通課程');
+
 		\wp_send_json_success(
 			[
-				'title'       => '已收到您的合約簽屬，等待審閱!',
-				'description' => '審閱大約需要 3~5 個工作天，請耐心等候',
+				'title'       => $title,
+				'description' => $description,
 			]
 			);
 	}

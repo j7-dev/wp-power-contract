@@ -20,6 +20,8 @@ abstract class Base {
 	const API_TIMEOUT   = '30000';
 	const DEFAULT_IMAGE = 'http://1.gravatar.com/avatar/1c39955b5fe5ae1bf51a77642f052848?s=96&d=mm&r=g';
 
+	const SETTINGS_KEY = 'power_contract_settings';
+
 
 	/**
 	 * I18n 字串翻譯
@@ -41,5 +43,25 @@ abstract class Base {
 			'screenshot_url' =>  __('Signed Contract', 'power_contract'),
 			default => $key,
 		};
+	}
+
+
+	/**
+	 * 取得設定
+	 *
+	 * @param string|null $key 設定 key
+	 * @param string|null $default 預設值
+	 * @return string|array
+	 */
+	public static function get_settings( ?string $key = null, ?string $default = null ): string|array {
+		$settings = \get_option(self::SETTINGS_KEY, []);
+		if (!\is_array($settings)) {
+			$settings = [];
+		}
+		if (!$key) {
+			return $settings;
+		}
+
+		return $settings[ $key ] ?? $default;
 	}
 }

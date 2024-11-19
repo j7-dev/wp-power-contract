@@ -209,7 +209,7 @@ final class Init {
 		}
 
 		if ( isset( $_FILES['seal'] ) && $_FILES['seal']['error'] === UPLOAD_ERR_OK ) { //phpcs:ignore
-			$uploaded_files = WP::upload_files_to_media( $_FILES['seal'], true ); //phpcs:ignore
+			$uploaded_files = WP::upload_files( $_FILES['seal'], true ); //phpcs:ignore
 
 			if ( ! \is_wp_error( $uploaded_files ) && isset( $uploaded_files[0]['url'] ) ) {
 				\update_post_meta( $post_id, 'seal_url', $uploaded_files[0]['url'] );
