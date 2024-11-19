@@ -62,7 +62,7 @@ final class Ajax {
 		$user_id   = \get_current_user_id();
 		$user_name = $post_data['user_name'] ?? '未填寫姓名';
 
-		$attachment_id = WP::upload_base64_image_to_media( $post_data['screenshot'], 'contract' );
+		$img_info = WP::upload_single_base64_image( $post_data['screenshot'], 'contract', true );
 		unset( $post_data['screenshot'] );
 
 		[
@@ -71,6 +71,7 @@ final class Ajax {
 		] = WP::separator($post_data, 'post');
 
 		$contract_template_name = \get_the_title( $meta_data['contract_template_id'] );
+		$meta_data['screenshot_url'] = $img_info['url'];
 
 		$data['meta_input'] = $meta_data;
 		$default_args       = [
@@ -83,7 +84,6 @@ final class Ajax {
 			$user_id ? "對應 user_id: #{$user_id}" : ''
 			),
 			'post_author'   => $user_id,
-			'_thumbnail_id' => $attachment_id,
 		];
 
 		$args = \wp_parse_args( $data, $default_args );

@@ -107,7 +107,7 @@ final class Init {
 			'rest_base'             => '',
 			'show_in_menu'          => 'edit.php?post_type=' . ContractTemplate::POST_TYPE,
 			'capability_type'       => 'post',
-			'supports'              => [ 'title', 'author', 'thumbnail' ],
+			'supports'              => [ 'title' ],
 			'map_meta_cap'          => true,
 			'taxonomies'            => [],
 			'rest_controller_class' => 'WP_REST_Posts_Controller',
@@ -311,11 +311,11 @@ final class Init {
 		unset($post_meta['_edit_lock']);
 		unset($post_meta['_thumbnail_id']);
 
-		// add featured image url
-		$featured_image_url           = \get_the_post_thumbnail_url( \get_the_ID(), 'full' );
-		$signed_contract              = $featured_image_url ? sprintf(
+		// add screenshot_url
+		$screenshot_url               = \get_post_meta( \get_the_ID(), 'screenshot_url', true );
+		$signed_contract              = $screenshot_url ? sprintf(
 		/*html*/'<a href="%1$s" target="_blank"><img src="%1$s" style="%2$s" /></a>',
-		$featured_image_url,
+		$screenshot_url,
 		'width: 10rem;border: 1px solid #ccc;'
 		) : '';
 		$post_meta['signed_contract'] = [ $signed_contract ];

@@ -38,7 +38,7 @@ abstract class Base {
 			'user_phone' =>  __('User Phone', 'power_contract'),
 			'signed_contract' =>  __('Signed Contract', 'power_contract'),
 			'signed_at' =>  __('Signed At', 'power_contract'),
-
+			'screenshot_url' =>  __('Signed Contract', 'power_contract'),
 			default => $key,
 		};
 	}
