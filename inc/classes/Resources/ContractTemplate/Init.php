@@ -9,8 +9,7 @@ namespace J7\PowerContract\Resources\ContractTemplate;
 
 use J7\PowerContract\Plugin;
 use J7\PowerContract\Shortcodes\Shortcodes;
-
-
+use J7\WpUtils\Classes\WP;
 
 if (class_exists('J7\PowerContract\Resources\ContractTemplate')) {
 	return;
@@ -31,6 +30,8 @@ final class Init {
 		\add_action( 'load-post.php', [ __CLASS__, 'init_metabox' ] );
 		\add_action( 'load-post-new.php', [ __CLASS__, 'init_metabox' ] );
 		\add_filter( 'template_include', [ __CLASS__, 'load_custom_template' ], 9999 );
+		\add_action( 'save_post_' . self::POST_TYPE, [ __CLASS__, 'save_metabox' ], 10, 2 );
+		\add_action( 'post_edit_form_tag', [ __CLASS__, 'update_edit_form' ] );
 	}
 
 	/**
@@ -91,7 +92,7 @@ final class Init {
 			'menu_position'         => 6,
 			'menu_icon'             => 'dashicons-media-document',
 			'capability_type'       => 'post',
-			'supports'              => [ 'title', 'editor', 'thumbnail' ],
+			'supports'              => [ 'title', 'editor' ],
 			'taxonomies'            => [],
 			'rest_controller_class' => 'WP_REST_Posts_Controller',
 			'rewrite'               => [
@@ -107,15 +108,15 @@ final class Init {
 	 * Meta box initialization.
 	 */
 	public static function init_metabox(): void {
-		\add_action( 'add_meta_boxes', [ __CLASS__, 'add_metabox' ] );
+		\add_action( 'add_meta_boxes', [ __CLASS__, 'add_metaboxes' ] );
 	}
 
 	/**
-	 * Adds the meta box.
+	 * Adds the meta boxes.
 	 *
 	 * @param string $post_type Post type.
 	 */
-	public static function add_metabox( string $post_type ): void {
+	public static function add_metaboxes( string $post_type ): void {
 		if ( in_array( $post_type, [ self::POST_TYPE ], true ) ) {
 			\add_meta_box(
 				self::POST_TYPE . '-metabox',
@@ -124,6 +125,14 @@ final class Init {
 				$post_type,
 				'advanced',
 				'high'
+			);
+			\add_meta_box(
+				self::POST_TYPE . '-image-metabox',
+				__( 'Seal Image', 'power_contract' ),
+				[ __CLASS__, 'render_image_meta_box' ],
+				$post_type,
+				'side',
+				'default'
 			);
 		}
 	}
@@ -159,6 +168,56 @@ final class Init {
 	}
 
 	/**
+	 * Render image meta box.
+	 *
+	 * @param \WP_Post $post Post object.
+	 */
+	public static function render_image_meta_box( \WP_Post $post ): void {
+		$seal_url = \get_post_meta( $post->ID, 'seal_url', true );
+
+		printf(
+		/*html*/'
+			<p style="overflow: hidden;">
+				<input type="file" name="seal" value="" size="25" />
+				<input type="hidden" name="seal_nonce" value="%1$s" />
+			</p>
+		',
+		\wp_create_nonce(self::POST_TYPE)
+		);
+
+		if ($seal_url) {
+			printf(
+			/*html*/'<img src="%1$s" style="max-width: 100%%; margin-top: 10px;" />',
+			\esc_url($seal_url)
+			);
+		}
+	}
+
+	/**
+	 * Save meta box data.
+	 *
+	 * @param int      $post_id Post ID.
+	 * @param \WP_Post $post Post object.
+	 */
+	public static function save_metabox( int $post_id, \WP_Post $post ): void {
+		if ( ! isset( $_POST['seal_nonce'] ) || ! \wp_verify_nonce( $_POST['seal_nonce'], self::POST_TYPE ) ) { // phpcs:ignore
+			return;
+		}
+
+		if ( ! \current_user_can( 'edit_post', $post_id ) ) {
+			return;
+		}
+
+		if ( isset( $_FILES['seal'] ) && $_FILES['seal']['error'] === UPLOAD_ERR_OK ) { //phpcs:ignore
+			$uploaded_files = WP::upload_files_to_media( $_FILES['seal'], true ); //phpcs:ignore
+
+			if ( ! \is_wp_error( $uploaded_files ) && isset( $uploaded_files[0]['url'] ) ) {
+				\update_post_meta( $post_id, 'seal_url', $uploaded_files[0]['url'] );
+			}
+		}
+	}
+
+	/**
 	 * Load custom template
 	 * Set {Plugin::$kebab}/{slug}/report  php template
 	 *
@@ -169,5 +228,12 @@ final class Init {
 			return Plugin::$dir . '/inc/templates/contract-template.php';
 		}
 		return $template;
+	}
+
+	/**
+	 * Update edit form tag
+	 */
+	public static function update_edit_form(): void {
+		echo ' enctype="multipart/form-data"';
 	}
 }

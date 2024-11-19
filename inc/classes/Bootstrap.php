@@ -7,9 +7,6 @@ declare (strict_types = 1);
 
 namespace J7\PowerContract;
 
-use J7\PowerContract\Utils\Base;
-use Kucrut\Vite;
-
 if ( class_exists( 'J7\PowerContract\Bootstrap' ) ) {
 	return;
 }
@@ -49,7 +46,7 @@ final class Bootstrap {
 			return;
 		}
 
-		if ( ! \in_array( $_GET['post_type'], [ Resources\Contract\Init::POST_TYPE, Resources\ContractTemplate\Init::POST_TYPE ], true ) ) {
+		if ( ! \in_array( $_GET['post_type'] ?? '', [ Resources\Contract\Init::POST_TYPE, Resources\ContractTemplate\Init::POST_TYPE ], true ) ) { // phpcs:ignore
 			return;
 		}
 

@@ -159,7 +159,7 @@ final class Shortcodes {
 			'id' => $id,
 		] = $args;
 
-		$src = \get_the_post_thumbnail_url($post->ID, 'full');
+		$src = \get_post_meta($post->ID, 'seal_url', true);
 		if (!$src) {
 			return '❗❗❗找不到公司章❗❗❗';
 		}
@@ -211,7 +211,7 @@ final class Shortcodes {
 		$html = sprintf(
 		/*html*/'
 		<div %1$s %2$s>
-			<div class="pct__signature cant_edit flex justify-center items-center text-2xl font-bold border border-black border-solid cursor-pointer" style="%3$s">簽名</div>
+			<div class="pct__signature cant_edit flex justify-center items-center text-2xl font-bold border border-black border-solid cursor-pointer" style="%3$s">點這簽名</div>
 			<dialog class="pc-modal items-start">
 				<div class="pc-modal-box w-screen max-w-[100vw] h-full rounded-none">
 					<canvas class="pct__signature-canvas"></canvas>

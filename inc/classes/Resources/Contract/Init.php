@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace J7\PowerContract\Resources\Contract;
 
-use J7\PowerContract\Plugin;
+use J7\PowerContract\Utils\Base;
 use J7\PowerContract\Resources\ContractTemplate\Init as ContractTemplate;
 
 
@@ -150,13 +150,13 @@ final class Init {
 	 */
 	public static function render_meta_box(): void {
 		$post_meta = \get_post_meta( \get_the_ID() );
+
+		$post_meta = self::post_meta_format( $post_meta );
+
 		echo '<table>';
 		foreach ($post_meta as $key => $value) {
-			if (in_array($key, [ '_edit_lock', '_thumbnail_id' ], true)) {
-				continue;
-			}
 			$content = $value[0];
-			if (\str_starts_with($content, 'data:image')) {
+			if (\str_starts_with( (string) $content, 'data:image')) {
 				$content = sprintf(
 				/*html*/'
 				<a href="%1$s" target="_blank"><img src="%1$s" alt="%2$s" style="%3$s" /></a>
@@ -178,24 +178,6 @@ final class Init {
 			$content
 			);
 		}
-
-		// featured image url
-		$featured_image_url = \get_the_post_thumbnail_url( \get_the_ID(), 'full' );
-		printf(
-		/*html*/'
-		<tr>
-			<td style="vertical-align: top;border-bottom: 1px solid #ccc;padding: 0.5rem 0.5rem;">簽屬合約</td>
-			<td style="vertical-align: top;border-bottom: 1px solid #ccc;padding: 0.5rem 0.5rem;">
-				%1$s
-			</td>
-		</tr>
-		',
-		$featured_image_url ? sprintf(
-		/*html*/'<a href="%1$s" target="_blank"><img src="%1$s" style="%2$s" /></a>',
-		$featured_image_url,
-		'width: 10rem;border: 1px solid #ccc;'
-		) : ''
-		);
 		echo '</table>';
 	}
 
@@ -317,5 +299,39 @@ final class Init {
 			$count = (int) $_REQUEST['changed-to-approved'];
 			printf('<div id="message" class="updated notice is-dismissable"><p>' . _n('%d contract changed to Approved.', '%d contracts changed to Approved.', $count, 'power_contract') . '</p></div>', $count);
 		}
+	}
+
+	/**
+	 * 調整 post meta 新增/刪除顯示欄位
+	 *
+	 * @param array $post_meta 文章 meta
+	 * @return array
+	 */
+	private static function post_meta_format( array $post_meta ): array {
+		unset($post_meta['_edit_lock']);
+		unset($post_meta['_thumbnail_id']);
+
+		// add featured image url
+		$featured_image_url           = \get_the_post_thumbnail_url( \get_the_ID(), 'full' );
+		$signed_contract              = $featured_image_url ? sprintf(
+		/*html*/'<a href="%1$s" target="_blank"><img src="%1$s" style="%2$s" /></a>',
+		$featured_image_url,
+		'width: 10rem;border: 1px solid #ccc;'
+		) : '';
+		$post_meta['signed_contract'] = [ $signed_contract ];
+
+		// add signed_at
+		// get local time
+		$signed_at_timestamp    = \get_the_date( 'U' );
+		$signed_at              = \wp_date( 'Y-m-d H:i:s', $signed_at_timestamp );
+		$post_meta['signed_at'] = [ $signed_at ];
+
+		// turn key to i18n
+		$post_meta_i18n = [];
+		foreach ($post_meta as $key => $value) {
+			$post_meta_i18n[ Base::i18n($key) ] = $value;
+		}
+
+		return $post_meta_i18n;
 	}
 }

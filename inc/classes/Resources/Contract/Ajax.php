@@ -9,6 +9,8 @@ namespace J7\PowerContract\Resources\Contract;
 
 use J7\PowerContract\Plugin;
 use J7\WpUtils\Classes\WP;
+use J7\WpUtils\Classes\General;
+
 
 
 if (class_exists('J7\PowerContract\Resources\Contract')) {
@@ -46,6 +48,7 @@ final class Ajax {
 		unset( $_POST['nonce'] );
 		unset( $_POST['action'] );
 		$post_data               = WP::sanitize_text_field_deep( $_POST, false, [ 'screenshot', 'signature' ] );
+		$post_data['client_ip']  = General::get_client_ip();
 		$include_required_params = WP::include_required_params( $post_data, [ 'contract_template_id' ] );
 		if ( true !== $include_required_params ) {
 			\wp_send_json_error(
@@ -59,7 +62,7 @@ final class Ajax {
 		$user_id   = \get_current_user_id();
 		$user_name = $post_data['user_name'] ?? '未填寫姓名';
 
-		$attachment_id = self::upload_base64_image( $post_data['screenshot'] );
+		$attachment_id = WP::upload_base64_image_to_media( $post_data['screenshot'], 'contract' );
 		unset( $post_data['screenshot'] );
 
 		[
@@ -94,42 +97,5 @@ final class Ajax {
 				'description' => '審閱大約需要 3~5 個工作天，請耐心等候',
 			]
 			);
-	}
-
-
-
-	/**
-	 * Save the image on the server.
-	 *
-	 * @param string $base64_img Base64 encoded image.
-	 * @return int Attachment ID.
-	 */
-	private static function upload_base64_image( string $base64_img ): int {
-
-		// Upload dir.
-		$upload_dir  = wp_upload_dir();
-		$upload_path = str_replace( '/', DIRECTORY_SEPARATOR, $upload_dir['path'] ) . DIRECTORY_SEPARATOR;
-
-		$img             = str_replace( 'data:image/jpeg;base64,', '', $base64_img );
-		$img             = str_replace( ' ', '+', $img );
-		$decoded         = base64_decode( $img );
-		$filename        = 'contract.jpeg';
-		$file_type       = 'image/jpeg';
-		$hashed_filename = md5( $filename . microtime() ) . '_' . $filename;
-
-		// Save the image in the uploads directory.
-		$upload_file = file_put_contents( $upload_path . $hashed_filename, $decoded );
-
-		$attachment = [
-			'post_mime_type' => $file_type,
-			'post_title'     => preg_replace( '/\.[^.]+$/', '', basename( $hashed_filename ) ),
-			'post_content'   => '',
-			'post_status'    => 'inherit',
-			'guid'           => $upload_dir['url'] . '/' . basename( $hashed_filename ),
-		];
-
-		$attach_id = \wp_insert_attachment( $attachment, $upload_dir['path'] . '/' . $hashed_filename );
-
-		return $attach_id;
 	}
 }

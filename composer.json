@@ -1,6 +1,6 @@
 {
 	"name": "j7-dev/power-contract",
-	"description": "This is a boilerplate for creating a WordPress plugin with React, Tailwind, Ant Design, TypeScript, Zod, MSW, React Router v6, React Query v4, SCSS and Vite.",
+	"description": "WordPress 線上簽合約 & 審批 外掛",
 	"type": "wordpress-plugin",
 	"license": "GPL-2.0-only",
 	"authors": [
@@ -29,8 +29,7 @@
 		}
 	},
 	"require": {
-		"kucrut/vite-for-wp": "^0.8.0",
-		"j7-dev/wp-utils": "0.2.44"
+		"j7-dev/wp-utils": "0.2.46"
 	},
 	"require-dev": {
 		"squizlabs/php_codesniffer": "@stable",

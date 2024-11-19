@@ -6,13 +6,13 @@
  * Version:           0.0.1
  * Requires at least: 5.7
  * Requires PHP:      8.0
- * Author:            Your Name
+ * Author:            JerryLiu
  * Author URI:        https://github.com/j7-dev
  * License:           GPL v2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       power_contract
  * Domain Path:       /languages
- * Tags: your tags
+ * Tags:              contract, signature, approval
  */
 
 declare ( strict_types=1 );
@@ -55,9 +55,9 @@ final class Plugin {
 
 		$this->init(
 			[
-				'app_name'    => 'Power Contract',
-				'github_repo' => 'https://github.com/j7-dev/wp-power-contract',
-				'callback'    => [ Bootstrap::class, 'instance' ],
+				'app_name'     => 'Power Contract',
+				'github_repo'  => 'https://github.com/j7-dev/wp-power-contract',
+				'callback'     => [ Bootstrap::class, 'instance' ],
 				'lc'           => 'skip',
 				'hide_submenu' => true,
 			]
