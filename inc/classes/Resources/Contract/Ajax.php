@@ -42,19 +42,6 @@ final class Ajax {
 				);
 		}
 
-		$user_id = \get_current_user_id();
-		if ( !$user_id ) {
-			\wp_send_json_error(
-				[
-					'title'       => 'OOPS! 合約簽屬中發生錯誤!',
-					'description' => '請先登入',
-				]
-				);
-		}
-
-		$user         = \get_user_by( 'ID', $user_id );
-		$display_name = $user->display_name;
-
 		// sanitize $_POST
 		unset( $_POST['nonce'] );
 		unset( $_POST['action'] );
@@ -68,6 +55,9 @@ final class Ajax {
 				]
 			);
 		}
+
+		$user_id   = \get_current_user_id();
+		$user_name = $post_data['user_name'] ?? '未填寫姓名';
 
 		$attachment_id = self::upload_base64_image( $post_data['screenshot'] );
 		unset( $post_data['screenshot'] );
@@ -83,7 +73,12 @@ final class Ajax {
 		$default_args       = [
 			'post_type'     => Init::POST_TYPE,
 			'post_status'   => 'pending',
-			'post_title'    => "{$contract_template_name} 合約 - {$display_name} #{$user_id}",
+			'post_title'    => sprintf(
+			/*html*/'%1$s 合約 - %2$s %3$s',
+			$contract_template_name,
+			$user_name,
+			$user_id ? "對應 user_id: #{$user_id}" : ''
+			),
 			'post_author'   => $user_id,
 			'_thumbnail_id' => $attachment_id,
 		];

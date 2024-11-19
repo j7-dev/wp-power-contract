@@ -37,37 +37,37 @@ final class Shortcodes {
 		'user_name' => [
 			'shortcode'   => '[pct_input name="user_name"]',
 			'label'       => '姓名輸入框',
-			'description' => '',
+			'description' => '可輸入 <code>name</code>, <code>width</code>, <code>placeholder</code>, <code>style</code>, <code>class</code>, <code>id</code> 屬性來指定欄位名稱、寬度、placeholder css 樣式、css 類別、與 id',
 		],
 		'user_address' => [
-			'shortcode'   => '[pct_input name="user_address"]',
+			'shortcode'   => '[pct_input name="user_address" width="320px"]',
 			'label'       => '地址輸入框',
-			'description' => '',
+			'description' => '可輸入 <code>name</code>, <code>width</code>, <code>placeholder</code>, <code>style</code>, <code>class</code>, <code>id</code> 屬性來指定欄位名稱、寬度、placeholder css 樣式、css 類別、與 id',
 		],
 		'user_identity' => [
 			'shortcode'   => '[pct_input name="user_identity"]',
 			'label'       => '身分證字號輸入框',
-			'description' => '',
+			'description' => '可輸入 <code>name</code>, <code>width</code>, <code>placeholder</code>, <code>style</code>, <code>class</code>, <code>id</code> 屬性來指定欄位名稱、寬度、placeholder css 樣式、css 類別、與 id',
 		],
 		'user_phone' => [
 			'shortcode'   => '[pct_input name="user_phone"]',
 			'label'       => '手機號碼輸入框',
-			'description' => '',
+			'description' => '可輸入 <code>name</code>, <code>width</code>, <code>placeholder</code>, <code>style</code>, <code>class</code>, <code>id</code> 屬性來指定欄位名稱、寬度、placeholder css 樣式、css 類別、與 id',
 		],
 		'contract_amount' => [
 			'shortcode'   => '[pct_input name="contract_amount"]',
 			'label'       => '合約金額輸入框',
-			'description' => '',
+			'description' => '可輸入 <code>name</code>, <code>width</code>, <code>placeholder</code>, <code>style</code>, <code>class</code>, <code>id</code> 屬性來指定欄位名稱、寬度、placeholder css 樣式、css 類別、與 id',
 		],
 		'pct_seal' => [
 			'shortcode'   => '[pct_seal]',
 			'label'       => '公司章(連動精選圖片)',
-			'description' => '',
+			'description' => '可輸入 <code>style</code>, <code>class</code>, <code>id</code> 屬性來指定 css 樣式、css 類別、與 id',
 		],
 		'pct_signature' => [
 			'shortcode'   => '[pct_signature]',
 			'label'       => '簽名板',
-			'description' => '',
+			'description' => '可輸入 <code>style</code>, <code>class</code>, <code>id</code> 屬性來指定 css 樣式、css 類別、與 id',
 		],
 	];
 
@@ -96,6 +96,7 @@ final class Shortcodes {
 			'placeholder' => '請輸入',
 			'class'       => '',
 			'id'          => '',
+			'type'        => 'text',
 		];
 
 		$args = \wp_parse_args(
@@ -109,12 +110,14 @@ final class Shortcodes {
 			'placeholder' => $placeholder,
 			'class' => $class,
 			'id' => $id,
+			'type' => $type,
 		] = $args;
 
 		$html = sprintf(
 		/*html*/'
-		<input type="text" name="%1$s" class="cant_edit py-0.5 px-3 appearance-none outline-none border-none focus:outline-none focus:ring-0 focus:border-none text-[1.125em]" style="width: %2$s;border-bottom: 1px solid #111;" placeholder="%3$s" %4$s %5$s />
+		<input type="%1$s" name="%2$s" class="cant_edit py-0.5 px-3 appearance-none outline-none border-none focus:outline-none focus:ring-0 focus:border-none text-[1.125em]" style="width: %3$s;border-bottom: 1px solid #111;" placeholder="%4$s" %5$s %6$s />
 		',
+		$type,
 		$name,
 		$width,
 		$placeholder,

@@ -30,7 +30,7 @@ final class Init {
 		\add_action( 'init', [ __CLASS__, 'register_cpt' ] );
 		\add_action( 'load-post.php', [ __CLASS__, 'init_metabox' ] );
 		\add_filter('manage_' . self::POST_TYPE . '_posts_columns', [ $this, 'add_status_column' ]);
-		\add_action('manage_' . self::POST_TYPE . '_posts_custom_column', [ $this, 'render_status_column' ], 10, 2);
+		\add_action('manage_' . self::POST_TYPE . '_posts_custom_column', [ $this, 'render_column' ], 10, 2);
 		\add_action('admin_menu', [ $this, 'remove_submitdiv_metabox' ]);
 		\add_filter('bulk_actions-edit-' . self::POST_TYPE, [ $this, 'add_bulk_actions' ]);
 		\add_filter('handle_bulk_actions-edit-' . self::POST_TYPE, [ $this, 'handle_bulk_actions' ], 10, 3);
@@ -207,7 +207,10 @@ final class Init {
 	 */
 	public function add_status_column( array $columns ): array {
 		// status 放在 title 後面
-		$columns = \array_slice($columns, 0, 2) + [ 'status' => __('Status', 'power_contract') ] + \array_slice($columns, 2);
+		$columns = \array_slice($columns, 0, 2) + [
+			'user_name' => __('name', 'power_contract'),
+			'status'    => __('Status', 'power_contract'),
+		] + \array_slice($columns, 2);
 		return $columns;
 	}
 
@@ -218,7 +221,7 @@ final class Init {
 	 * @param int    $post_id 文章 ID
 	 * @return void
 	 */
-	public function render_status_column( string $column, int $post_id ): void {
+	public function render_column( string $column, int $post_id ): void {
 		if ('status' === $column) {
 			$post_status = \get_post_status($post_id);
 
@@ -234,7 +237,11 @@ final class Init {
 			'display: inline-flex;line-height: 2.5em;border-radius: 4px;border-bottom: 1px solid rgba(0,0,0,.05);margin: -.25em 0;cursor: inherit !important;white-space: nowrap;max-width: 100%;text-decoration: none;word-wrap: break-word;font-size: 13px;',
 			$post_status,
 			);
+		}
 
+		if ('user_name' === $column) {
+			$user_name = \get_post_meta($post_id, 'user_name', true);
+			echo $user_name;
 		}
 	}
 

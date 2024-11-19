@@ -5,7 +5,7 @@
 		$('.copy-shortcode').on('click', async function () {
 			const shortcode = $(this).find('.shortcode').text();
 			// 移除斷行跟空白
-			const cleanShortcode = shortcode.replace(/\s+/g, '').trim();
+			const cleanShortcode = shortcode.trim();
 			await navigator.clipboard.writeText(cleanShortcode);
 			$(this).find('.check-icon').html(checkIcon)
 		});
