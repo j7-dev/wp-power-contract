@@ -41,12 +41,13 @@ declare const signature_pad_custom_data: {
 								const $confirmBtn = $(this).parent().find('.pct__signature-confirm')
 
 								$modal[0].showModal()
-									; ($canvas[0] as HTMLCanvasElement).width = $(
+									; ($canvas[0] as HTMLCanvasElement).width = $modal.find(
 										'.pc-modal-box',
 									).width() as number
-									; ($canvas[0] as HTMLCanvasElement).height =
-										($('.pc-modal-box').height() as number) - 72
-
+									; ($canvas[0] as HTMLCanvasElement).height = Math.min(
+										($modal.height() as number) - 284,
+										($canvas[0] as HTMLCanvasElement).width / 16 * 9
+									)
 								const signaturePad = new SignaturePad(
 									$canvas[0] as HTMLCanvasElement,
 								)

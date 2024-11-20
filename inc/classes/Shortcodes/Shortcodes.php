@@ -115,7 +115,7 @@ final class Shortcodes {
 
 		$html = sprintf(
 		/*html*/'
-		<input type="%1$s" name="%2$s" class="cant_edit py-0.5 px-3 appearance-none outline-none border-none focus:outline-none focus:ring-0 focus:border-none text-[1.125em]" style="width: %3$s;border-bottom: 1px solid #111;" placeholder="%4$s" %5$s %6$s />
+		<input type="%1$s" name="%2$s" class="cant_edit py-0.5 px-3 appearance-none outline-none border-none focus:outline-none focus:ring-0 focus:border-none text-[1.125em] max-w-full" style="width: %3$s;border-bottom: 1px solid #111;" placeholder="%4$s" %5$s %6$s />
 		',
 		$type,
 		$name,
@@ -213,7 +213,7 @@ final class Shortcodes {
 		<div %1$s %2$s>
 			<div class="pct__signature cant_edit flex justify-center items-center text-2xl font-bold border border-black border-solid cursor-pointer" style="%3$s">點這簽名</div>
 			<dialog class="pc-modal items-start">
-				<div class="pc-modal-box w-screen max-w-[100vw] h-full rounded-none">
+				<div class="pc-modal-box w-screen max-w-[100vw] rounded-none">
 					<canvas class="pct__signature-canvas"></canvas>
 					<div class="pc-modal-action">
 						<form method="dialog">
