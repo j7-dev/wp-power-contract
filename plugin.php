@@ -3,7 +3,7 @@
  * Plugin Name:       Power Contract
  * Plugin URI:        https://github.com/j7-dev/wp-power-contract
  * Description:       WordPress 線上簽合約 & 審批 外掛
- * Version:           0.0.1
+ * Version:           0.0.2
  * Requires at least: 5.7
  * Requires PHP:      8.0
  * Author:            J7
