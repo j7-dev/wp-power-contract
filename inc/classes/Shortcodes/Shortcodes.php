@@ -97,12 +97,15 @@ final class Shortcodes {
 			'class'       => '',
 			'id'          => '',
 			'type'        => 'text',
+			'value'       => '',
 		];
 
 		$args = \wp_parse_args(
 		$params,
 		$default_args,
 		);
+
+		$args = \apply_filters('power_contract_input_args', $args);
 
 		[
 			'name' => $name,
@@ -111,18 +114,20 @@ final class Shortcodes {
 			'class' => $class,
 			'id' => $id,
 			'type' => $type,
+			'value' => $value,
 		] = $args;
 
 		$html = sprintf(
 		/*html*/'
-		<input type="%1$s" name="%2$s" class="cant_edit py-0.5 px-3 appearance-none outline-none border-none focus:outline-none focus:ring-0 focus:border-none text-[1.125em] max-w-full" style="width: %3$s;border-bottom: 1px solid #111;" placeholder="%4$s" %5$s %6$s />
+		<input type="%1$s" name="%2$s" class="cant_edit py-0.5 px-3 appearance-none outline-none border-none focus:outline-none focus:ring-0 focus:border-none text-[1.125em] max-w-full %3$s" style="width: %4$s;border-bottom: 1px solid #111;" placeholder="%5$s" %6$s value="%7$s" />
 		',
 		$type,
 		$name,
+		$value ? "pointer-events-none !bg-transparent {$class}" : $class, // 如果有 value 就不能編輯
 		$width,
 		$placeholder,
 		$id ? "id=\"{$id}\"" : '',
-		$class ? "class=\"{$class}\"" : ''
+		$value
 		);
 
 		return $html;
@@ -152,6 +157,8 @@ final class Shortcodes {
 		$params,
 		$default_args,
 		);
+
+		$args = \apply_filters('power_contract_seal_args', $args);
 
 		[
 			'style' => $style,
@@ -201,6 +208,8 @@ final class Shortcodes {
 		$params,
 		$default_args,
 		);
+
+		$args = \apply_filters('power_contract_signature_args', $args);
 
 		[
 			'style' => $style,

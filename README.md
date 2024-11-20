@@ -20,6 +20,8 @@
 
  - Power Contract 可以接入各編輯器，像是 `傳統編輯器`、`區塊編輯器`、`Elementor` 等，你可以用你熟悉的工具調整版面
  - Shortcode 都可以設置 `class`、`id`，所以如果你更習慣寫 `css`, `javascript`，也可以自行調整
+ - 支持任意 `input name` 名稱，在未衝突的情況都會存入 `post_meta`
+ - 如果 input 的 shortcode 手動填入 `value` ，則會變成 `readonly`，且不能編輯
 
 
 ### 2. 將合約模板網址傳給您的客戶查閱
