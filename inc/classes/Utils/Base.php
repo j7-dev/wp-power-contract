@@ -7,6 +7,8 @@ declare (strict_types = 1);
 
 namespace J7\PowerContract\Utils;
 
+use J7\PowerContract\Admin\Settings;
+
 if (class_exists('J7\PowerContract\Utils\Base')) {
 	return;
 }
@@ -19,9 +21,6 @@ abstract class Base {
 	const APP2_SELECTOR = '#power_contract_metabox';
 	const API_TIMEOUT   = '30000';
 	const DEFAULT_IMAGE = 'http://1.gravatar.com/avatar/1c39955b5fe5ae1bf51a77642f052848?s=96&d=mm&r=g';
-
-	const SETTINGS_KEY = 'power_contract_settings';
-
 
 	/**
 	 * I18n 字串翻譯
@@ -50,11 +49,11 @@ abstract class Base {
 	 * 取得設定
 	 *
 	 * @param string|null $key 設定 key
-	 * @param string|null $default 預設值
+	 * @param ?string     $default_value 預設值
 	 * @return string|array
 	 */
-	public static function get_settings( ?string $key = null, ?string $default = null ): string|array {
-		$settings = \get_option(self::SETTINGS_KEY, []);
+	public static function get_settings( ?string $key = null, ?string $default_value = '' ): string|array {
+		$settings = \get_option(Settings::SETTINGS_KEY, []);
 		if (!\is_array($settings)) {
 			$settings = [];
 		}
@@ -62,6 +61,6 @@ abstract class Base {
 			return $settings;
 		}
 
-		return $settings[ $key ] ?? $default;
+		return $settings[ $key ] ?? $default_value;
 	}
 }

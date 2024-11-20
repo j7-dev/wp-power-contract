@@ -26,10 +26,24 @@ final class Bootstrap {
 		Shortcodes\Shortcodes::instance();
 		Admin\Settings::instance();
 
+		\add_action( 'init', [ __CLASS__, 'register_assets' ], 99 );
 		\add_action( 'admin_enqueue_scripts', [ __CLASS__, 'admin_enqueue_script_list_view' ], 99 );
 		\add_action( 'admin_enqueue_scripts', [ __CLASS__, 'admin_enqueue_script_edit_view' ], 100 );
-
 		\add_action( 'wp_enqueue_scripts', [ __CLASS__, 'frontend_enqueue_script' ], 99 );
+	}
+
+	/**
+	 * Register assets
+	 *
+	 * @return void
+	 */
+	public static function register_assets(): void {
+		\wp_register_style(
+			Plugin::$kebab,
+			Plugin::$url . '/js/dist/assets/css/index.css',
+			[],
+			Plugin::$version
+		);
 	}
 
 	/**
@@ -121,13 +135,7 @@ final class Bootstrap {
 	 * @return void
 	 */
 	public static function enqueue_script(): void {
-
-		\wp_enqueue_style(
-			Plugin::$kebab,
-			Plugin::$url . '/js/dist/assets/css/index.css',
-			[],
-			Plugin::$version
-		);
+		\wp_enqueue_style(Plugin::$kebab);
 
 		// 自訂 js
 		\wp_enqueue_script(

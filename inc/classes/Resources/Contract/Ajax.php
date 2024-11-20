@@ -91,7 +91,7 @@ final class Ajax {
 		\wp_insert_post( $args );
 
 		$title       = Base::get_settings('ajax_signed_title', '已收到您的合約簽屬，等待審閱!');
-		$description = Base::get_settings('ajax_signed_description', '審閱完成後會立即通知您，並為您開通課程');
+		$description = Base::get_settings('ajax_signed_description', '審閱大約需 3~5 工作天，請耐心等候');
 
 		\wp_send_json_success(
 			[

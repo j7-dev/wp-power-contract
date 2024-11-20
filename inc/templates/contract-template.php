@@ -1,6 +1,14 @@
 <?php // phpcs:disable
+
+use J7\PowerContract\Admin\Settings;
+use J7\PowerContract\Utils\Base;
+
 global $post;
 $contract_template_id = $post->ID;
+
+$ajax_signed_btn_text = Base::get_settings('ajax_signed_btn_text');
+$ajax_signed_btn_link = Base::get_settings('ajax_signed_btn_link');
+
 ?>
 
 <!doctype html>
@@ -41,10 +49,13 @@ $contract_template_id = $post->ID;
 			<div class="pc-modal-box">
 				<h3 class="pct__finish-modal__title text-lg font-bold"></h3>
 				<p class="pct__finish-modal__description py-4"></p>
+
+				<?php if ( $ajax_signed_btn_text ) : ?>
+				<div class="pc-modal-action">
+					<a href="<?php echo esc_url( $ajax_signed_btn_link ); ?>" class="pc-btn pc-btn-primary"><?php echo esc_html( $ajax_signed_btn_text ); ?></a>
+					</div>
+				<?php endif; ?>
 			</div>
-			<form method="dialog" class="pc-modal-backdrop">
-				<button class="opacity-0">close</button>
-			</form>
 		</dialog>
 
 		<?php wp_footer(); ?>

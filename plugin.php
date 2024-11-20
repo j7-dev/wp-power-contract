@@ -62,6 +62,8 @@ final class Plugin {
 			'hide_submenu' => true,
 		]
 		);
+
+		self::$template_page_names = [ 'settings' ];
 	}
 }
 

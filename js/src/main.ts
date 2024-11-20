@@ -11,168 +11,170 @@ declare const signature_pad_custom_data: {
 		returnUrl?: string
 	}
 }
-;(function ($: typeof jQuery) {
-	$(document).ready(function () {
-		;($('#pct__continue-btn') as JQuery<HTMLButtonElement>).on(
-			'click',
-			function () {
-				// 畫面滾到最上方
-				window.scrollTo({
-					top: 0,
-					behavior: 'smooth',
-				})
+	; (function ($: typeof jQuery) {
+		$(document).ready(function () {
+			; ($('#pct__continue-btn') as JQuery<HTMLButtonElement>).on(
+				'click',
+				function () {
+					// 畫面滾到最上方
+					window.scrollTo({
+						top: 0,
+						behavior: 'smooth',
+					})
 
-				$(this).hide()
-				$('#pct__continue-description').hide()
-				const $submitBtn = $('#pct__submit-btn').show()
-				$('.cant_edit').removeClass('cant_edit').addClass('can_edit')
-				;($('.pct__signature.can_edit') as JQuery<HTMLDivElement>).on(
-					'click',
-					function () {
-						// 上一層 div
-						const $signatureField = $(this)
-						const $modal = $(this)
-							.parent()
-							.find('dialog.pc-modal') as JQuery<HTMLDialogElement>
-						if (!$modal) {
+					$(this).hide()
+					$('#pct__continue-description').hide()
+					const $submitBtn = $('#pct__submit-btn').show()
+					$('.cant_edit').removeClass('cant_edit').addClass('can_edit')
+						; ($('.pct__signature.can_edit') as JQuery<HTMLDivElement>).on(
+							'click',
+							function () {
+								// 上一層 div
+								const $signatureField = $(this)
+								const $modal = $(this)
+									.parent()
+									.find('dialog.pc-modal') as JQuery<HTMLDialogElement>
+								if (!$modal) {
+									return
+								}
+								const $canvas = $(this).parent().find('.pct__signature-canvas')
+								const $confirmBtn = $(this).parent().find('.pct__signature-confirm')
+
+								$modal[0].showModal()
+									; ($canvas[0] as HTMLCanvasElement).width = $(
+										'.pc-modal-box',
+									).width() as number
+									; ($canvas[0] as HTMLCanvasElement).height =
+										($('.pc-modal-box').height() as number) - 72
+
+								const signaturePad = new SignaturePad(
+									$canvas[0] as HTMLCanvasElement,
+								)
+								$confirmBtn.on('click', function () {
+									const src = signaturePad.toDataURL()
+									$signatureField.html(`<img src="${src}" class="w-full" />`)
+								})
+
+								// 監聽關閉事件
+								$modal.on('close', function () {
+									// 關閉時移除點擊事件
+									$confirmBtn.off('click')
+								})
+							},
+						)
+
+					/**
+					 * 驗證所有欄位是否填寫完成
+					 *
+					 * @return {boolean}
+					 */
+					const validFields = () => {
+						// const isValid = validateFields();
+						let isValid = true
+
+						// 其中一個 input 沒有值 就 false
+						isValid = !($('input.can_edit').toArray() as HTMLInputElement[]).some(
+							function (input) {
+								return !input.value
+							},
+						)
+
+						if ($('.pct__signature img').length === 0) {
+							isValid = false
+						}
+						return isValid
+					}
+
+					$submitBtn.on('click', async function () {
+						const isValid = validFields()
+
+						if (!isValid) {
+							$('#pct__fields-validate__warning').show()
 							return
 						}
-						const $canvas = $(this).parent().find('.pct__signature-canvas')
-						const $confirmBtn = $(this).parent().find('.pct__signature-confirm')
 
-						$modal[0].showModal()
-						;($canvas[0] as HTMLCanvasElement).width = $(
-							'.pc-modal-box',
-						).width() as number
-						;($canvas[0] as HTMLCanvasElement).height =
-							($('.pc-modal-box').height() as number) - 72
-
-						const signaturePad = new SignaturePad(
-							$canvas[0] as HTMLCanvasElement,
+						const nonce = signature_pad_custom_data?.env?.nonce
+						const ajaxUrl = signature_pad_custom_data?.env?.ajaxUrl
+						const returnUrl =
+							signature_pad_custom_data?.env?.returnUrl || window.location.origin
+						const contract_template_id = $(this as HTMLButtonElement).data(
+							'contract_template_id',
 						)
-						$confirmBtn.on('click', function () {
-							const src = signaturePad.toDataURL()
-							$signatureField.html(`<img src="${src}" class="w-full" />`)
+
+						// collect input data to inputData with reduce
+						const inputData = ($('input.can_edit') as JQuery<HTMLInputElement>)
+							.toArray()
+							.reduce((acc: { [key: string]: string }, input) => {
+								acc[input.name] = input.value
+								return acc
+							}, {})
+
+						if (!nonce || !ajaxUrl || !contract_template_id) {
+							console.error('nonce, ajaxUrl, contract_template_id is required')
+							alert('缺少必要參數')
+							return
+						}
+
+						const formData = new FormData()
+						formData.append('action', 'create_contract') // WordPress AJAX action
+						formData.append('nonce', nonce) // WordPress 安全檢查用
+						formData.append('contract_template_id', contract_template_id)
+						formData.append(
+							'signature',
+							($('.pct__signature img') as JQuery<HTMLImageElement>).attr(
+								'src',
+							) as string,
+						)
+						Object.keys(inputData).forEach((key) => {
+							formData.append(key, inputData[key])
 						})
 
-						// 監聽關閉事件
-						$modal.on('close', function () {
-							// 關閉時移除點擊事件
-							$confirmBtn.off('click')
+						// 將合約主體 DOM 轉換成圖片跟著 API 送出
+						const contractMain = document.getElementById('contract-main')
+						if (!contractMain) {
+							console.error('contractMain is not found')
+							return
+						}
+
+						// 先將可以編輯的欄位背景變透明
+						$('.can_edit').css('backgroundColor', 'transparent')
+						$('.pct__signature').css('border', 'none')
+						const dataUrl = await domtoimage.toJpeg(contractMain, {
+							quality: 1,
+							bgcolor: '#fff',
 						})
-					},
-				)
 
-				/**
-				 * 驗證所有欄位是否填寫完成
-				 *
-				 * @return {boolean}
-				 */
-				const validFields = () => {
-					// const isValid = validateFields();
-					let isValid = true
+						formData.append('screenshot', dataUrl)
 
-					// 其中一個 input 沒有值 就 false
-					isValid = !($('input.can_edit').toArray() as HTMLInputElement[]).some(
-						function (input) {
-							return !input.value
-						},
-					)
+						$submitBtn.find('.pc-loading').show()
 
-					if ($('.pct__signature img').length === 0) {
-						isValid = false
-					}
-					return isValid
-				}
+						// ajax insert data
+						$.post({
+							url: ajaxUrl,
+							data: formData,
+							processData: false, // 必須設為 false
+							contentType: false, // 必須設為 false
+						})
+							.done(function (response) {
+								$submitBtn.find('.pc-loading').hide()
+									; ($('#pct__finish-modal')[0] as HTMLDialogElement).showModal()
+								const title = response?.data?.title
+								const description = response?.data?.description
 
-				$submitBtn.on('click', async function () {
-					const isValid = validFields()
-
-					if (!isValid) {
-						$('#pct__fields-validate__warning').show()
-						return
-					}
-
-					const nonce = signature_pad_custom_data?.env?.nonce
-					const ajaxUrl = signature_pad_custom_data?.env?.ajaxUrl
-					const returnUrl =
-						signature_pad_custom_data?.env?.returnUrl || window.location.origin
-					const contract_template_id = $(this as HTMLButtonElement).data(
-						'contract_template_id',
-					)
-
-					// collect input data to inputData with reduce
-					const inputData = ($('input.can_edit') as JQuery<HTMLInputElement>)
-						.toArray()
-						.reduce((acc: { [key: string]: string }, input) => {
-							acc[input.name] = input.value
-							return acc
-						}, {})
-
-					if (!nonce || !ajaxUrl || !contract_template_id) {
-						console.error('nonce, ajaxUrl, contract_template_id is required')
-						alert('缺少必要參數')
-						return
-					}
-
-					const formData = new FormData()
-					formData.append('action', 'create_contract') // WordPress AJAX action
-					formData.append('nonce', nonce) // WordPress 安全檢查用
-					formData.append('contract_template_id', contract_template_id)
-					formData.append(
-						'signature',
-						($('.pct__signature img') as JQuery<HTMLImageElement>).attr(
-							'src',
-						) as string,
-					)
-					Object.keys(inputData).forEach((key) => {
-						formData.append(key, inputData[key])
+								// 顯示 response 內文
+								$('#pct__finish-modal')
+									.find('.pct__finish-modal__title')
+									.text(title)
+								$('#pct__finish-modal')
+									.find('.pct__finish-modal__description')
+									.text(description)
+							})
+							.fail(function (xhr, status, error) {
+								console.error('error', error)
+								console.error('status', status)
+							})
 					})
-
-					// 將合約主體 DOM 轉換成圖片跟著 API 送出
-					const contractMain = document.getElementById('contract-main')
-					if (!contractMain) {
-						console.error('contractMain is not found')
-						return
-					}
-
-					// 先將可以編輯的欄位背景變透明
-					$('.can_edit').css('backgroundColor', 'transparent')
-					$('.pct__signature').css('border', 'none')
-					const dataUrl = await domtoimage.toJpeg(contractMain, {
-						quality: 1,
-						bgcolor: '#fff',
-					})
-
-					formData.append('screenshot', dataUrl)
-
-					$submitBtn.find('.pc-loading').show()
-
-					// ajax insert data
-					$.post({
-						url: ajaxUrl,
-						data: formData,
-						processData: false, // 必須設為 false
-						contentType: false, // 必須設為 false
-					})
-						.done(function (response) {
-							$submitBtn.find('.pc-loading').hide()
-							;($('#pct__finish-modal')[0] as HTMLDialogElement).showModal()
-							const title = response?.data?.title
-							const description = response?.data?.description
-							$('#pct__finish-modal')
-								.find('.pct__finish-modal__title')
-								.text(title)
-							$('#pct__finish-modal')
-								.find('.pct__finish-modal__description')
-								.text(description)
-						})
-						.fail(function (xhr, status, error) {
-							console.error('error', error)
-							console.error('status', status)
-						})
-				})
-			},
-		)
-	})
-})(jQuery)
+				},
+			)
+		})
+	})(jQuery)
