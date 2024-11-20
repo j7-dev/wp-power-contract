@@ -63,12 +63,7 @@ final class Bootstrap {
 			return;
 		}
 
-		\wp_enqueue_style(
-			Plugin::$kebab,
-			Plugin::$url . '/js/dist/assets/css/index.css',
-			[],
-			Plugin::$version
-		);
+		\wp_enqueue_style(Plugin::$kebab);
 	}
 
 	/**
@@ -80,24 +75,17 @@ final class Bootstrap {
 	 * @return void
 	 */
 	public static function admin_enqueue_script_edit_view( $hook ): void {
-		if ( 'post.php' !== $hook ) {
+		if ( ! \in_array( $hook, [ 'post.php', 'post-new.php' ], true ) ) {
 			return;
 		}
-		$post_id = $_GET['post']; // phpcs:ignore
-		if ( ! $post_id ) {
-			return;
-		}
-		$post_type = \get_post_type( $post_id );
+		$post_id = $_GET['post'] ?? ''; // phpcs:ignore
+
+		$post_type = $post_id ? \get_post_type( $post_id ) : ( $_GET['post_type'] );
 		if ( ! \in_array( $post_type, [ Resources\Contract\Init::POST_TYPE, Resources\ContractTemplate\Init::POST_TYPE ], true ) ) {
 			return;
 		}
 
-		\wp_enqueue_style(
-			Plugin::$kebab,
-			Plugin::$url . '/js/dist/assets/css/index.css',
-			[],
-			Plugin::$version
-		);
+		\wp_enqueue_style(Plugin::$kebab);
 
 		\wp_enqueue_script(
 			Plugin::$kebab,

@@ -51,7 +51,7 @@ final class Ajax {
 		if ( true !== $include_required_params ) {
 			\wp_send_json_error(
 				[
-					'code'       => 'sign_error',
+					'code'    => 'sign_error',
 					'message' => $include_required_params->get_error_message(),
 				]
 			);
@@ -91,8 +91,8 @@ final class Ajax {
 
 		\wp_send_json_success(
 			[
-				'code'       => 'sign_success',
-				'message'    => ''
+				'code'    => 'sign_success',
+				'message' => '',
 			]
 			);
 	}
