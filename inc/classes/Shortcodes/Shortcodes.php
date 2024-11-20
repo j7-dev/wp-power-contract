@@ -61,7 +61,7 @@ final class Shortcodes {
 		],
 		'pct_seal' => [
 			'shortcode'   => '[pct_seal]',
-			'label'       => '公司章(連動精選圖片)',
+			'label'       => '公司章',
 			'description' => '可輸入 <code>style</code>, <code>class</code>, <code>id</code> 屬性來指定 css 樣式、css 類別、與 id',
 		],
 		'pct_signature' => [
