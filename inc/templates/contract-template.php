@@ -1,11 +1,12 @@
 <?php // phpcs:disable
 
-use J7\PowerContract\Admin\Settings;
 use J7\PowerContract\Utils\Base;
 
 global $post;
 $contract_template_id = $post->ID;
 
+$ajax_signed_title = Base::get_settings('ajax_signed_title');
+$ajax_signed_description = Base::get_settings('ajax_signed_description');
 $ajax_signed_btn_text = Base::get_settings('ajax_signed_btn_text');
 $ajax_signed_btn_link = Base::get_settings('ajax_signed_btn_link');
 
@@ -47,12 +48,18 @@ $ajax_signed_btn_link = Base::get_settings('ajax_signed_btn_link');
 		<!-- 簽署完成 Modal -->
 		<dialog id="pct__finish-modal" class="pc-modal">
 			<div class="pc-modal-box">
-				<h3 class="pct__finish-modal__title text-lg font-bold"></h3>
-				<p class="pct__finish-modal__description py-4"></p>
+				<div class="pc-modal-box__success" style="display: none;">
+					<h3 class="pct__finish-modal__title text-lg font-bold"><?php echo esc_html( $ajax_signed_title ); ?></h3>
+						<p class="pct__finish-modal__description py-4"><?php echo $ajax_signed_description; ?></p>
+				</div>
+				<div class="pc-modal-box__error" style="display: none;">
+					<h3 class="pct__finish-modal__title text-lg font-bold"><?php echo esc_html( $ajax_signed_title ); ?></h3>
+					<p class="pct__finish-modal__description py-4"><?php echo $ajax_signed_description; ?></p>
+				</div>
 
 				<?php if ( $ajax_signed_btn_text ) : ?>
 				<div class="pc-modal-action">
-					<a href="<?php echo esc_url( $ajax_signed_btn_link ); ?>" class="pc-btn pc-btn-primary"><?php echo esc_html( $ajax_signed_btn_text ); ?></a>
+					<a href="<?php echo esc_url( $ajax_signed_btn_link ); ?>" class="pc-btn pc-btn-primary text-white"><?php echo esc_html( $ajax_signed_btn_text ); ?></a>
 					</div>
 				<?php endif; ?>
 			</div>

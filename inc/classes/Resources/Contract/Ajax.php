@@ -10,7 +10,6 @@ namespace J7\PowerContract\Resources\Contract;
 use J7\PowerContract\Plugin;
 use J7\WpUtils\Classes\WP;
 use J7\WpUtils\Classes\General;
-use J7\PowerContract\Utils\Base;
 
 if (class_exists('J7\PowerContract\Resources\Contract')) {
 	return;
@@ -52,8 +51,8 @@ final class Ajax {
 		if ( true !== $include_required_params ) {
 			\wp_send_json_error(
 				[
-					'title'       => 'OOPS! 合約簽屬中發生錯誤!',
-					'description' => $include_required_params->get_error_message(),
+					'code'       => 'sign_error',
+					'message' => $include_required_params->get_error_message(),
 				]
 			);
 		}
@@ -90,13 +89,10 @@ final class Ajax {
 		// insert data
 		\wp_insert_post( $args );
 
-		$title       = Base::get_settings('ajax_signed_title', '已收到您的合約簽屬，等待審閱!');
-		$description = Base::get_settings('ajax_signed_description', '審閱大約需 3~5 工作天，請耐心等候');
-
 		\wp_send_json_success(
 			[
-				'title'       => $title,
-				'description' => $description,
+				'code'       => 'sign_success',
+				'message'    => ''
 			]
 			);
 	}

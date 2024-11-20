@@ -159,16 +159,16 @@ declare const signature_pad_custom_data: {
 							.done(function (response) {
 								$submitBtn.find('.pc-loading').hide()
 									; ($('#pct__finish-modal')[0] as HTMLDialogElement).showModal()
-								const title = response?.data?.title
-								const description = response?.data?.description
 
-								// 顯示 response 內文
-								$('#pct__finish-modal')
-									.find('.pct__finish-modal__title')
-									.text(title)
-								$('#pct__finish-modal')
-									.find('.pct__finish-modal__description')
-									.text(description)
+								const isSuccess = response?.code === 'sign_success'
+
+								if (isSuccess) {
+									$('#pct__finish-modal').find('.pc-modal-box__success').show()
+									$('#pct__finish-modal').find('.pc-modal-box__error').hide()
+								} else {
+									$('#pct__finish-modal').find('.pc-modal-box__success').hide()
+									$('#pct__finish-modal').find('.pc-modal-box__error').show()
+								}
 							})
 							.fail(function (xhr, status, error) {
 								console.error('error', error)
