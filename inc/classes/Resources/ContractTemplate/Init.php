@@ -29,7 +29,7 @@ final class Init {
 		\add_action( 'init', [ __CLASS__, 'register_cpt' ] );
 		\add_action( 'load-post.php', [ __CLASS__, 'init_metabox' ] );
 		\add_action( 'load-post-new.php', [ __CLASS__, 'init_metabox' ] );
-		\add_filter( 'template_include', [ __CLASS__, 'load_custom_template' ], 9999 );
+		\add_filter( 'template_include', [ __CLASS__, 'load_custom_template' ], 90 );
 		\add_action( 'save_post_' . self::POST_TYPE, [ __CLASS__, 'save_metabox' ], 10, 2 );
 		\add_action( 'post_edit_form_tag', [ __CLASS__, 'update_edit_form' ] );
 	}
@@ -224,10 +224,25 @@ final class Init {
 	 * @param string|null $template Template.
 	 */
 	public static function load_custom_template( $template ) {
-		if (\is_singular(self::POST_TYPE)) {  // 'course' 是你的 custom post type
-			return Plugin::$dir . '/inc/templates/contract-template.php';
+		if (!\is_singular(self::POST_TYPE)) {
+			return $template;
 		}
-		return $template;
+		// 獲取當前文章
+		$post      = \get_queried_object();
+		$post_type = self::POST_TYPE;
+		// 正確的模板優先順序
+		$possible_theme_templates = [
+			\get_stylesheet_directory() . "/single-{$post_type}-{$post?->post_name}.php",
+			\get_stylesheet_directory() . "/single-{$post_type}.php",
+		];
+
+		// 檢查主題是否有對應的模板文件
+		foreach ($possible_theme_templates as $theme_template) {
+			if (file_exists($theme_template)) {
+				return $theme_template;
+			}
+		}
+		return Plugin::$dir . '/inc/templates/single-contract_template.php';
 	}
 
 	/**

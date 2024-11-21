@@ -24,6 +24,11 @@
  - 如果 input 的 shortcode 手動填入 `value` ，則會變成 `readonly`，且不能編輯
 
 
+#### ❓ 怎麼調整合約模板版面
+你可以複製 `wp-content/plugins/power-contract/inc/templates/single-contract_template.php` 到 `wp-content/themes/{您的佈景主題或子主題}/single-contract_template.php` ，並且修改
+
+`wp-content/plugins/power-contract/inc/templates/single-contract_template.php` 是合約模板的最小可運作模板，建議與專業人士或作者討論如何修改
+
 ### 2. 將合約模板網址傳給您的客戶查閱
 
 ![image](https://github.com/user-attachments/assets/b6f3bb32-76b1-49d0-a849-9b0d5030249b)
