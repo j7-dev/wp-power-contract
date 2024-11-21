@@ -1,0 +1,299 @@
+# Copyright (C) 2024 JerryLiu
+# This file is distributed under the GPL v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Power Contract 0.0.1\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/power-contract\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2024-11-19T06:41:39+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.10.0\n"
+"X-Domain: power_contract\n"
+
+#. Plugin Name of the plugin
+#: C:\Users\User\LocalSites\test\app\public\wp-content\plugins\power-contract\plugin.php
+msgid "Power Contract"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: C:\Users\User\LocalSites\test\app\public\wp-content\plugins\power-contract\plugin.php
+msgid "https://github.com/j7-dev/wp-power-contract"
+msgstr ""
+
+#. Description of the plugin
+#: C:\Users\User\LocalSites\test\app\public\wp-content\plugins\power-contract\plugin.php
+msgid "WordPress 線上簽合約 & 審批 外掛"
+msgstr ""
+
+#. Author of the plugin
+#: C:\Users\User\LocalSites\test\app\public\wp-content\plugins\power-contract\plugin.php
+msgid "JerryLiu"
+msgstr ""
+
+#. Author URI of the plugin
+#: C:\Users\User\LocalSites\test\app\public\wp-content\plugins\power-contract\plugin.php
+msgid "https://github.com/j7-dev"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:45
+#: inc/classes/Resources/Contract/Init.php:46
+#: inc/classes/Resources/Contract/Init.php:66
+#: inc/classes/Resources/Contract/Init.php:92
+#: inc/classes/Resources/Contract/Init.php:139
+msgid "Contract"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:47
+#: inc/classes/Resources/Contract/Init.php:48
+#: inc/classes/Resources/ContractTemplate/Init.php:43
+#: inc/classes/Resources/ContractTemplate/Init.php:44
+msgid "Add new"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:49
+#: inc/classes/Resources/ContractTemplate/Init.php:45
+msgid "Edit"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:50
+#: inc/classes/Resources/ContractTemplate/Init.php:46
+msgid "New"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:51
+#: inc/classes/Resources/Contract/Init.php:52
+#: inc/classes/Resources/ContractTemplate/Init.php:47
+#: inc/classes/Resources/ContractTemplate/Init.php:48
+msgid "View"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:53
+msgid "Search Contract"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:54
+#: inc/classes/Resources/ContractTemplate/Init.php:50
+msgid "Not Found"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:55
+#: inc/classes/Resources/ContractTemplate/Init.php:51
+msgid "Not found in trash"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:56
+#: inc/classes/Resources/ContractTemplate/Init.php:52
+msgid "Parent item"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:57
+msgid "All Contracts"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:58
+msgid "Contract archives"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:59
+msgid "Contract attributes"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:60
+msgid "Insert to this Contract"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:61
+msgid "Uploaded to this Contract"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:62
+#: inc/classes/Resources/ContractTemplate/Init.php:58
+msgid "Featured image"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:63
+#: inc/classes/Resources/ContractTemplate/Init.php:59
+msgid "Set featured image"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:64
+#: inc/classes/Resources/ContractTemplate/Init.php:60
+msgid "Remove featured image"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:65
+#: inc/classes/Resources/ContractTemplate/Init.php:61
+msgid "Use featured image"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:67
+msgid "Filter Contract list"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:68
+#: inc/classes/Resources/ContractTemplate/Init.php:64
+msgid "Filter by date"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:69
+msgid "Contract list navigation"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:70
+msgid "Contract list"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:71
+msgid "Contract published"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:72
+msgid "Contract published privately"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:73
+msgid "Contract reverted to draft"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:74
+msgid "Contract scheduled"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:75
+msgid "Contract updated"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:193
+msgid "name"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:194
+msgid "Status"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:246
+msgid "Change to Pending"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:247
+msgid "Change to Approved"
+msgstr ""
+
+#: inc/classes/Resources/Contract/Init.php:295
+msgid "%d contract changed to Pending."
+msgid_plural "%d contracts changed to Pending."
+msgstr[0] ""
+msgstr[1] ""
+
+#: inc/classes/Resources/Contract/Init.php:300
+msgid "%d contract changed to Approved."
+msgid_plural "%d contracts changed to Approved."
+msgstr[0] ""
+msgstr[1] ""
+
+#: inc/classes/Resources/ContractTemplate/Init.php:41
+#: inc/classes/Resources/ContractTemplate/Init.php:42
+#: inc/classes/Resources/ContractTemplate/Init.php:62
+#: inc/classes/Resources/ContractTemplate/Init.php:74
+msgid "Contract Template"
+msgstr ""
+
+#: inc/classes/Resources/ContractTemplate/Init.php:49
+msgid "Search Contract Template"
+msgstr ""
+
+#: inc/classes/Resources/ContractTemplate/Init.php:53
+msgid "All Contract Templates"
+msgstr ""
+
+#: inc/classes/Resources/ContractTemplate/Init.php:54
+msgid "Contract Template archives"
+msgstr ""
+
+#: inc/classes/Resources/ContractTemplate/Init.php:55
+msgid "Contract Template attributes"
+msgstr ""
+
+#: inc/classes/Resources/ContractTemplate/Init.php:56
+msgid "Insert to this Contract Template"
+msgstr ""
+
+#: inc/classes/Resources/ContractTemplate/Init.php:57
+msgid "Uploaded to this Contract Template"
+msgstr ""
+
+#: inc/classes/Resources/ContractTemplate/Init.php:63
+msgid "Filter Contract Template list"
+msgstr ""
+
+#: inc/classes/Resources/ContractTemplate/Init.php:65
+msgid "Contract Template list navigation"
+msgstr ""
+
+#: inc/classes/Resources/ContractTemplate/Init.php:66
+msgid "Contract Template list"
+msgstr ""
+
+#: inc/classes/Resources/ContractTemplate/Init.php:67
+msgid "Contract Template published"
+msgstr ""
+
+#: inc/classes/Resources/ContractTemplate/Init.php:68
+msgid "Contract Template published privately"
+msgstr ""
+
+#: inc/classes/Resources/ContractTemplate/Init.php:69
+msgid "Contract Template reverted to draft"
+msgstr ""
+
+#: inc/classes/Resources/ContractTemplate/Init.php:70
+msgid "Contract Template scheduled"
+msgstr ""
+
+#: inc/classes/Resources/ContractTemplate/Init.php:71
+msgid "Contract Template updated"
+msgstr ""
+
+#: inc/classes/Resources/ContractTemplate/Init.php:122
+msgid "Available Fields"
+msgstr ""
+
+#: inc/classes/Utils/Base.php:32
+msgid "Contract Template Id"
+msgstr ""
+
+#: inc/classes/Utils/Base.php:33
+msgid "Signature"
+msgstr ""
+
+#: inc/classes/Utils/Base.php:34
+msgid "User Name"
+msgstr ""
+
+#: inc/classes/Utils/Base.php:35
+msgid "Contract Amount"
+msgstr ""
+
+#: inc/classes/Utils/Base.php:36
+msgid "User Address"
+msgstr ""
+
+#: inc/classes/Utils/Base.php:37
+msgid "User Identity"
+msgstr ""
+
+#: inc/classes/Utils/Base.php:38
+msgid "User Phone"
+msgstr ""
+
+#: inc/classes/Utils/Base.php:39
+msgid "Signed Contract"
+msgstr ""
+
+#: inc/classes/Utils/Base.php:40
+msgid "Signed At"
+msgstr ""

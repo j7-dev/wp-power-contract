@@ -3,7 +3,7 @@
  * Title component
  */
 
-use J7\Powerhouse\Utils\Base;
+use J7\PowerContract\Utils\Base;
 
 /**
  * @var mixed $args
@@ -12,7 +12,7 @@ use J7\Powerhouse\Utils\Base;
 $default_args = [
 	'level'  => 'h2', // 'h1', 'h2', 'h3', 'h4', 'h5', 'h6
 	'value'  => '標題',
-	'color'  => Base::PRIMARY_COLOR,
+	'color'  => '#0284c7',
 	'class'  => '',
 	'styles' => [],
 ];

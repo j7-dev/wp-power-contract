@@ -80,7 +80,7 @@ final class Bootstrap {
 		}
 		$post_id = $_GET['post'] ?? ''; // phpcs:ignore
 
-		$post_type = $post_id ? \get_post_type( $post_id ) : ( $_GET['post_type'] );
+		$post_type = $post_id ? \get_post_type( $post_id ) : ( $_GET['post_type'] ); // phpcs:ignore
 		if ( ! \in_array( $post_type, [ Resources\Contract\Init::POST_TYPE, Resources\ContractTemplate\Init::POST_TYPE ], true ) ) {
 			return;
 		}

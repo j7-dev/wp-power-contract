@@ -1,36 +1,33 @@
 # Copyright (C) 2024 JerryLiu
 # This file is distributed under the GPL v2 or later.
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: Power Contract 0.0.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/power-contract\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Last-Translator: \n"
+"Language-Team: 繁體中文\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2024-11-21 03:31+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"POT-Creation-Date: 2024-11-19T06:41:39+00:00\n"
+"PO-Revision-Date: 2024-11-21 03:32+0000\n"
 "X-Generator: Loco https://localise.biz/\n"
 "X-Domain: power_contract\n"
-"\n"
-"Language: \n"
-"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;"
+"Language: zh_TW\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Loco-Version: 2.6.11; wp-6.7"
 
 #: ../../../../../../test/app/public/wp-content/plugins/power-contract/inc/classes/Resources/Contract/Init.php:300
 #: ../../../../../../test/app/public/wp-content/plugins/power-contract/release/power-contract/power-contract/inc/classes/Resources/Contract/Init.php:300
 msgid "%d contract changed to Approved."
 msgid_plural "%d contracts changed to Approved."
 msgstr[0] ""
-msgstr[1] ""
 
 #: ../../../../../../test/app/public/wp-content/plugins/power-contract/inc/classes/Resources/Contract/Init.php:295
 #: ../../../../../../test/app/public/wp-content/plugins/power-contract/release/power-contract/power-contract/inc/classes/Resources/Contract/Init.php:295
 msgid "%d contract changed to Pending."
 msgid_plural "%d contracts changed to Pending."
 msgstr[0] ""
-msgstr[1] ""
 
 #: ../../../../../../test/app/public/wp-content/plugins/power-contract/inc/classes/Resources/ContractTemplate/Init.php:123
 #: ../../../../../../test/app/public/wp-content/plugins/power-contract/release/power-contract/power-contract/inc/classes/Resources/ContractTemplate/Init.php:123
@@ -133,7 +130,7 @@ msgstr ""
 #: ../../../../../../test/app/public/wp-content/plugins/power-contract/release/power-contract/power-contract/inc/classes/Admin/Settings.php:40
 #: ../../../../../../test/app/public/wp-content/plugins/power-contract/release/power-contract/power-contract/inc/classes/Admin/Settings.php:41
 msgid "Settings"
-msgstr ""
+msgstr "設定"
 
 #: ../../../../../../test/app/public/wp-content/plugins/power-contract/inc/classes/Utils/Base.php:34
 #: ../../../../../../test/app/public/wp-content/plugins/power-contract/release/power-contract/power-contract/inc/classes/Utils/Base.php:34
@@ -170,12 +167,12 @@ msgstr ""
 #: ../../../../../../test/app/public/wp-content/plugins/power-contract/inc/classes/Utils/Base.php:37
 #: ../../../../../../test/app/public/wp-content/plugins/power-contract/release/power-contract/power-contract/inc/classes/Utils/Base.php:37
 msgid "User Address"
-msgstr ""
+msgstr "用戶地址"
 
 #: ../../../../../../test/app/public/wp-content/plugins/power-contract/inc/classes/Utils/Base.php:38
 #: ../../../../../../test/app/public/wp-content/plugins/power-contract/release/power-contract/power-contract/inc/classes/Utils/Base.php:38
 msgid "User Identity"
-msgstr ""
+msgstr "用戶身分證字號"
 
 #: ../../../../../../test/app/public/wp-content/plugins/power-contract/inc/classes/Utils/Base.php:35
 #: ../../../../../../test/app/public/wp-content/plugins/power-contract/release/power-contract/power-contract/inc/classes/Utils/Base.php:35

@@ -72,3 +72,12 @@
 
 ![image](https://github.com/user-attachments/assets/6c62e1b6-6a1d-43ee-9fba-e3fa6a379b89)
 
+<br /><br /><br />
+
+<hr />
+
+### ⛏️ 多語系工作仍在進行中
+
+![image](https://github.com/user-attachments/assets/a966a721-feb8-451c-83f7-685ec56282f1)
+
+
