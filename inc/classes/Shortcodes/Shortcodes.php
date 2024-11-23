@@ -25,6 +25,7 @@ final class Shortcodes {
 		'pct_input',
 		'pct_seal',
 		'pct_signature',
+		'pct_date',
 	];
 
 
@@ -68,6 +69,16 @@ final class Shortcodes {
 			'shortcode'   => '[pct_signature]',
 			'label'       => '簽名板',
 			'description' => '可輸入 <code>style</code>, <code>class</code>, <code>id</code> 屬性來指定 css 樣式、css 類別、與 id',
+		],
+		'pct_date' => [
+			'shortcode'   => '[pct_date]',
+			'label'       => '日期',
+			'description' => '
+			可輸入 <code>format</code>, <code>base</code> 屬性來指定日期格式與基準<br>
+			例如：<code>[pct_date format="中華民國 Y 年 m 月 d 日" base="tw"]</code> 會顯示"中華民國 112 年 11 月 23 日"，不帶參數的話預設也是這樣顯示<br>
+			例如：<code>[pct_date format="西元 Y 年 m 月 d 日" base="ad"]</code> 會顯示"西元 2024 年 11 月 23 日"<br>
+			<code>base</code> 如果輸入 <code>ad</code> 則會顯示西元日期，如果輸入 <code>tw</code> 則會顯示中華民國日期<br>
+			<code>format</code> 可以輸入中文字加上<code>Y</code>、<code>m</code>、<code>d</code> 來顯示年月日',
 		],
 	];
 
@@ -242,5 +253,34 @@ final class Shortcodes {
 		);
 
 		return $html;
+	}
+
+	/**
+	 * 顯示日期
+	 *
+	 * @param array|null $atts 短碼參數
+	 * @return string
+	 */
+	public static function pct_date_callback( ?array $atts ): string {
+		$default_atts = [
+			'format' => '中華民國 Y 年 m 月 d 日',
+			'base'   => 'tw', // tw | ad 中華民國 | 西元
+		];
+
+		$atts = \wp_parse_args(
+		$atts,
+		$default_atts,
+		);
+
+		$date = new \DateTime();
+		if ($atts['base'] === 'tw') {
+			$year           = $date->format('Y') - 1911;
+			$formatted_date = str_replace('Y', (string) $year, $atts['format']);
+			$formatted_date = $date->format($formatted_date);
+		} else {
+			$formatted_date = $date->format($atts['format']);
+		}
+
+		return $formatted_date;
 	}
 }
