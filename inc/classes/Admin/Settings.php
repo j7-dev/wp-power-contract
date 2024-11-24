@@ -23,10 +23,17 @@ final class Settings {
 	const SETTINGS_KEY = 'power_contract_settings';
 
 	/**
+	 * Tabs
+	 *
+	 * @var array<string, array{title: string, disabled?: bool}>
+	 */
+	public $tabs = [];
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
-		\add_action('admin_menu', [ __CLASS__, 'add_submenu_page' ]);
+		\add_action('admin_menu', [ $this, 'add_submenu_page' ]);
 		\add_action('admin_init', [ __CLASS__, 'register_settings' ]);
 		\add_action('admin_enqueue_scripts', [ __CLASS__, 'admin_enqueue_script' ]);
 	}
@@ -34,14 +41,14 @@ final class Settings {
 	/**
 	 * Add submenu page
 	 */
-	public static function add_submenu_page(): void {
+	public function add_submenu_page(): void {
 		\add_submenu_page(
 			'edit.php?post_type=' . ContractTemplate::POST_TYPE,
 			__('Settings', 'power_contract'),
 			__('Settings', 'power_contract'),
 			'manage_options',
 			self::MENU_SLUG,
-			[ __CLASS__, 'render_page' ]
+			[ $this, 'render_page' ]
 		);
 	}
 
@@ -55,7 +62,8 @@ final class Settings {
 	/**
 	 * Render settings page
 	 */
-	public static function render_page(): void {
+	public function render_page(): void {
+		$this->tabs = include_once __DIR__ . '/setting_tabs.php';
 		Plugin::safe_get('settings');
 	}
 

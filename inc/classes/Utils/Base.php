@@ -8,6 +8,7 @@ declare (strict_types = 1);
 namespace J7\PowerContract\Utils;
 
 use J7\PowerContract\Admin\Settings;
+use J7\PowerContract\Admin\SettingsDTO;
 
 if (class_exists('J7\PowerContract\Utils\Base')) {
 	return;
@@ -42,25 +43,5 @@ abstract class Base {
 			'screenshot_url' =>  __('Signed Contract', 'power_contract'),
 			default => $key,
 		};
-	}
-
-
-	/**
-	 * 取得設定
-	 *
-	 * @param string|null $key 設定 key
-	 * @param ?string     $default_value 預設值
-	 * @return string|array
-	 */
-	public static function get_settings( ?string $key = null, ?string $default_value = '' ): string|array {
-		$settings = \get_option(Settings::SETTINGS_KEY, []);
-		if (!\is_array($settings)) {
-			$settings = [];
-		}
-		if (!$key) {
-			return $settings;
-		}
-
-		return $settings[ $key ] ?? $default_value;
 	}
 }

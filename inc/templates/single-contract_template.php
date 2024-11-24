@@ -1,14 +1,15 @@
 <?php // phpcs:disable
 
-use J7\PowerContract\Utils\Base;
+use J7\PowerContract\Admin\SettingsDTO;
 
 global $post;
 $contract_template_id = $post->ID;
 
-$ajax_signed_title = Base::get_settings('ajax_signed_title', '已經收到您的合約合約簽屬');
-$ajax_signed_description = Base::get_settings('ajax_signed_description', '合約審閱需要3~5天，請耐心等候' );
-$ajax_signed_btn_text = Base::get_settings('ajax_signed_btn_text');
-$ajax_signed_btn_link = Base::get_settings('ajax_signed_btn_link');
+$settings_dto = SettingsDTO::get_instance();
+$ajax_signed_title = $settings_dto->ajax_signed_title ?? '已經收到您的合約合約簽屬';
+$ajax_signed_description = $settings_dto->ajax_signed_description ?? '合約審閱需要3~5天，請耐心等候';
+$ajax_signed_btn_text = $settings_dto->ajax_signed_btn_text ?? '';
+$ajax_signed_btn_link = $settings_dto->ajax_signed_btn_link ?? '';
 
 ?>
 

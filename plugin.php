@@ -37,21 +37,15 @@ final class Plugin {
 	 */
 	public function __construct() {
 		// if your plugin depends on other plugins, you can add them here
-		// $this->required_plugins = [
-		// [
-		// 'name'     => 'WooCommerce',
-		// 'slug'     => 'woocommerce',
-		// 'required' => true,
-		// 'version'  => '7.6.0',
-		// ],
-		// [
-		// 'name'     => 'Powerhouse',
-		// 'slug'     => 'powerhouse',
-		// 'source'   => '[YOUR GITHUB URL]/wp-powerhouse/releases/latest/download/powerhouse.zip',
-		// 'version'  => '1.0.14',
-		// 'required' => true,
-		// ],
-		// ];
+		$this->required_plugins = [
+			// [
+			// 'name'     => 'Powerhouse',
+			// 'slug'     => 'powerhouse',
+			// 'source'   => 'https://github.com/j7-dev/wp-powerhouse/releases/latest/download/powerhouse.zip',
+			// 'version'  => '2.0.6',
+			// 'required' => true,
+			// ],
+		];
 
 		$this->init(
 		[

@@ -25,7 +25,9 @@ final class Bootstrap {
 		Resources\Contract\Ajax::instance();
 		Shortcodes\Shortcodes::instance();
 		Admin\Settings::instance();
-
+		if (class_exists('WooCommerce')) {
+			Woocommerce\FrontEnd\Checkout::instance();
+		}
 		\add_action( 'init', [ __CLASS__, 'register_assets' ], 99 );
 		\add_action( 'admin_enqueue_scripts', [ __CLASS__, 'admin_enqueue_script_list_view' ], 99 );
 		\add_action( 'admin_enqueue_scripts', [ __CLASS__, 'admin_enqueue_script_edit_view' ], 100 );
@@ -108,7 +110,7 @@ final class Bootstrap {
 	 */
 	public static function frontend_enqueue_script(): void {
 		global $post;
-		$post_type = $post->post_type;
+		$post_type = $post?->post_type;
 		if ( $post_type !== Resources\ContractTemplate\Init::POST_TYPE ) {
 			return;
 		}
