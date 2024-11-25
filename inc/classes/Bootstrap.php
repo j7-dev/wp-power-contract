@@ -25,9 +25,9 @@ final class Bootstrap {
 		Resources\Contract\Ajax::instance();
 		Shortcodes\Shortcodes::instance();
 		Admin\Settings::instance();
-		if (class_exists('WooCommerce')) {
-			Woocommerce\FrontEnd\Checkout::instance();
-		}
+		// if (class_exists('WooCommerce')) {
+		// 	Woocommerce\FrontEnd\Checkout::instance();
+		// }
 		\add_action( 'init', [ __CLASS__, 'register_assets' ], 99 );
 		\add_action( 'admin_enqueue_scripts', [ __CLASS__, 'admin_enqueue_script_list_view' ], 99 );
 		\add_action( 'admin_enqueue_scripts', [ __CLASS__, 'admin_enqueue_script_edit_view' ], 100 );

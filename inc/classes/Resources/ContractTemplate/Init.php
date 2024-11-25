@@ -31,6 +31,7 @@ final class Init {
 		\add_action( 'load-post-new.php', [ __CLASS__, 'init_metabox' ] );
 		\add_filter( 'template_include', [ __CLASS__, 'load_custom_template' ], 90 );
 		\add_action( 'save_post_' . self::POST_TYPE, [ __CLASS__, 'save_metabox' ], 10, 2 );
+		\add_action( 'rest_insert_' . self::POST_TYPE, [ __CLASS__, 'save_block_editor_metabox' ], 10, 2 );
 		\add_action( 'post_edit_form_tag', [ __CLASS__, 'update_edit_form' ] );
 	}
 
@@ -214,6 +215,20 @@ final class Init {
 			if ( ! \is_wp_error( $uploaded_files ) && isset( $uploaded_files[0]['url'] ) ) {
 				\update_post_meta( $post_id, 'seal_url', $uploaded_files[0]['url'] );
 			}
+		}
+	}
+
+	/**
+	 * 儲存區塊編輯器的自訂欄位資料
+	 *
+	 * @param \WP_Post         $post     已儲存的文章物件
+	 * @param \WP_REST_Request $request  請求物件
+	 */
+	public static function save_block_editor_metabox( \WP_Post $post, \WP_REST_Request $request ): void {
+		$params = $request->get_params();
+
+		if ( isset( $params['meta']['seal_url'] ) ) {
+			\update_post_meta( $post->ID, 'seal_url', $params['meta']['seal_url'] );
 		}
 	}
 
