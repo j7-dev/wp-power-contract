@@ -147,11 +147,14 @@ final class Init {
 
 	/**
 	 * Render meta box.
+	 *
+	 * @param \WP_Post $post 文章
 	 */
-	public static function render_meta_box(): void {
-		$post_meta = \get_post_meta( \get_the_ID() );
+	public static function render_meta_box( $post ): void {
+		$post_id   = $post->ID;
+		$post_meta = \get_post_meta( $post_id );
 
-		$post_meta = self::post_meta_format( $post_meta );
+		$post_meta = self::post_meta_format( (int) $post_id, $post_meta );
 
 		echo '<table>';
 		foreach ($post_meta as $key => $value) {
@@ -335,15 +338,17 @@ final class Init {
 	/**
 	 * 調整 post meta 新增/刪除顯示欄位
 	 *
+	 * @param int   $post_id 文章 ID
 	 * @param array $post_meta 文章 meta
 	 * @return array
 	 */
-	private static function post_meta_format( array $post_meta ): array {
+	private static function post_meta_format( int $post_id, array $post_meta ): array {
 		unset($post_meta['_edit_lock']);
 		unset($post_meta['_thumbnail_id']);
+		unset($post_meta['_order_id']);
 
 		// add screenshot_url
-		$screenshot_url               = \get_post_meta( \get_the_ID(), 'screenshot_url', true );
+		$screenshot_url               = \get_post_meta( $post_id, 'screenshot_url', true );
 		$signed_contract              = $screenshot_url ? sprintf(
 		/*html*/'<a href="%1$s" target="_blank"><img src="%1$s" style="%2$s" /></a>',
 		$screenshot_url,
@@ -353,9 +358,35 @@ final class Init {
 
 		// add signed_at
 		// get local time
-		$signed_at_timestamp    = \get_the_date( 'U' );
+		$post = \get_post( $post_id );
+		$signed_at_timestamp    = \get_the_date( 'U', $post );
 		$signed_at              = \wp_date( 'Y-m-d H:i:s', $signed_at_timestamp );
 		$post_meta['signed_at'] = [ $signed_at ];
+
+		// 如果有訂單關聯，則新增訂單資訊
+		$order_array = [];
+		if (class_exists('WooCommerce')) {
+			$order_id = \get_post_meta($post_id, '_order_id', true);
+			$order    = $order_id ? \wc_get_order($order_id) : null;
+			if ($order) {
+				$order_number     = $order->get_order_number();
+				$order_link       = \get_edit_post_link($order_id);
+				$customer_id      = $order->get_customer_id();
+				$customer_name    = $order->get_formatted_billing_full_name();
+				$customer_email   = $order->get_billing_email();
+				$customer_phone   = $order->get_billing_phone();
+				$customer_address = Base::get_full_address($customer_id, 'shipping');
+
+				$order_array = [
+					'relation_order_id' => $order ? [ sprintf('<a href="%1$s" target="_blank">%2$s</a>', $order_link, "#{$order_number}") ] : [ '' ],
+					'customer_name'     => [ $customer_name ],
+					'customer_email'    => [ $customer_email ],
+					'customer_phone'    => [ $customer_phone ],
+					'customer_address'  => [ $customer_address ],
+				];
+			}
+		}
+		$post_meta = array_merge($post_meta, $order_array);
 
 		// turn key to i18n
 		$post_meta_i18n = [];

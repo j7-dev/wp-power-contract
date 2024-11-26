@@ -1,8 +1,7 @@
 <?php
 /**
- * Settings General Tab
+ * Settings Woocommerce Tab
  */
-
 
 use J7\PowerContract\Admin\Settings;
 use J7\PowerContract\Admin\SettingsDTO;

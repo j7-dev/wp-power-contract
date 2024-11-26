@@ -60,6 +60,11 @@ final class SettingsDTO extends DTO {
 	 */
 	public $display_contract_after_checkout = false;
 
+	/**
+	 * @var array<string>
+	 * 合約簽署後要寄出的 email 地址
+	 */
+	public $emails = [ '' ];
 
 	/**
 	 * 取得已經從 wp_option 取得資料後的實例

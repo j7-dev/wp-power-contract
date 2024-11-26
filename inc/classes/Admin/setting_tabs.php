@@ -16,4 +16,9 @@ return [
 		'disabled' => !class_exists('WooCommerce'),
 		'content'  => !class_exists('WooCommerce') ? __('Woocommerce is not installed', 'power_contract') : Plugin::get('settings/woocommerce', null, false),
 	],
+	'email' => [
+		'title'    => __('Email', 'power_contract'),
+		'disabled' => false,
+		'content'  => Plugin::get('settings/email', null, false),
+	],
 ];

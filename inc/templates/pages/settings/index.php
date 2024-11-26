@@ -12,8 +12,9 @@ echo '<div class="wrap">';
 echo '<h1>' . \esc_html__('Contract Template Settings', 'power_contract') . '</h1>';
 
 
+/*
 printf(
-/*html*/'
+'
 <sl-alert open class="mt-8 mb-4">
   <sl-icon slot="icon" name="info-circle"></sl-icon>
   %1$s
@@ -21,6 +22,7 @@ printf(
 ',
 __('You can override the default settings in contract template post', 'power_contract'),
 );
+*/
 
 echo '<form method="post" action="options.php">';
 \settings_fields($settings_key);

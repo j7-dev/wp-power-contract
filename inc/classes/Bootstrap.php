@@ -25,6 +25,7 @@ final class Bootstrap {
 		Resources\Contract\Ajax::instance();
 		Shortcodes\Shortcodes::instance();
 		Admin\Settings::instance();
+		Email\Email::instance();
 		if (class_exists('WooCommerce')) {
 			// Woocommerce\FrontEnd\Checkout::instance();
 			Woocommerce\FrontEnd\MyAccount::instance();
