@@ -74,6 +74,22 @@
 
 <br /><br /><br />
 
+## Hooks
+
+### 簽約後 action hook
+
+透過此 hook 可以自由控制簽約後的行為
+
+`do_action( 'power_contract_contract_created', $new_contract_id, $args )`
+
+
+### 調整 input shortcode 欄位參數
+
+如果你想要動態調整 input shortcode 欄位參數，可以使用此 filter hook
+例如要自動帶入參數的話，此 hook 很有用
+
+`apply_filters('power_contract_input_args', $args)`
+
 <hr />
 
 ### ⛏️ 多語系工作仍在進行中

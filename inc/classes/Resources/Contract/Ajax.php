@@ -87,7 +87,9 @@ final class Ajax {
 		$args = \wp_parse_args( $data, $default_args );
 
 		// insert data
-		\wp_insert_post( $args );
+		$new_contract_id = \wp_insert_post( $args );
+
+		\do_action( 'power_contract_contract_created', $new_contract_id, $args );
 
 		\wp_send_json_success(
 			[
