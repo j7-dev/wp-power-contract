@@ -23,10 +23,6 @@ if (class_exists('J7\PowerContract\LPA\Bonnie')) {
 	return;
 }
 
-// 如果沒有安裝 Oberon 的 bonnie 外掛，就 return
-if (!class_exists('\Bonnie\Api\Bonnie_Api')) {
-	return;
-}
 /**
  * Class Bonnie
  */
@@ -53,6 +49,12 @@ final class Bonnie {
 	 * Constructor
 	 */
 	public function __construct() {
+
+		// 如果沒有安裝 Oberon 的 bonnie 外掛，就 return
+		if (!class_exists('\Bonnie\Api\Bonnie_Api')) {
+			return;
+		}
+
 		// \add_filter('bot_bonnie_button_url', [ $this, 'add_params_to_bonnie_button_url' ], 10, 3);
 		\add_action( 'woocommerce_order_status_completed', [ $this, 'push_bonnie_module' ], 10, 1 );
 	}
