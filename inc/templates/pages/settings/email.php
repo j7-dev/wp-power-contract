@@ -47,6 +47,9 @@ echo '</div>';
 	// 移除
 	$('.pct-emails').on('click', 'sl-icon[name="dash-circle"]', function(e) {
 		e.stopPropagation();
+		if (1 === $('.pct-email-row').length) {
+			return;
+		}
 		const index = $(this).closest('.pct-email-row').data('index');
 		$(this).closest('.pct-email-row').remove();
 		reOrder();

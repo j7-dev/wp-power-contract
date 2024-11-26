@@ -62,6 +62,7 @@ final class MyAccount {
 			return;
 		}
 
+		echo '<section class="woocommerce-contract-details">';
 		echo '<h2 class="woocommerce-column__title">合約</h2>';
 
 		echo '<div class="flex flex-wrap gap-4">';
@@ -82,5 +83,6 @@ final class MyAccount {
 			);
 		}
 		echo '</div>';
+		echo '</section>';
 	}
 }
