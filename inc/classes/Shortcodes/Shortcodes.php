@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace J7\PowerContract\Shortcodes;
 
 use J7\PowerContract\Utils\Base;
+use J7\PowerContract\Admin\SettingsDTO;
 
 if (class_exists('J7\PowerContract\Shortcodes\Shortcodes')) {
 	return;
@@ -299,6 +300,11 @@ final class Shortcodes {
 	 * @return array 輸入框的參數
 	 */
 	public static function set_default_value( array $args ): array {
+		$settings_dto = SettingsDTO::get_instance();
+		if (!$settings_dto->display_order_info) {
+			return $args;
+		}
+
 		$order_id = $_GET['order_id'] ?? null; // phpcs:ignore
 		if (!$order_id) {
 			return $args;
@@ -311,6 +317,12 @@ final class Shortcodes {
 
 		$user = $order->get_user();
 		if (!$user) {
+			return $args;
+		}
+
+		$current_user_id = \get_current_user_id();
+		// 如果當前用戶與訂單用戶不同，就不自動填入，防止被猜出其他用戶個資
+		if ($current_user_id !== $user->ID) {
 			return $args;
 		}
 
