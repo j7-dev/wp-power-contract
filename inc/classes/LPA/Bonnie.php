@@ -18,6 +18,7 @@ declare(strict_types=1);
 namespace J7\PowerContract\LPA;
 
 use J7\PowerContract\Resources\ContractTemplate\Init;
+use J7\WpUtils\Classes\General;
 
 if (class_exists('J7\PowerContract\LPA\Bonnie')) {
 	return;
@@ -57,6 +58,7 @@ final class Bonnie {
 
 		// \add_filter('bot_bonnie_button_url', [ $this, 'add_params_to_bonnie_button_url' ], 10, 3);
 		\add_action( 'woocommerce_order_status_completed', [ $this, 'push_bonnie_module' ], 10, 1 );
+		\add_action( 'wp_head', [ __CLASS__, 'custom_style' ], 99 );
 	}
 
 	/** phpcs:disable
@@ -242,5 +244,26 @@ final class Bonnie {
 		);
 
 		return $permalink_with_params;
+	}
+
+	/**
+	 * Custom style
+	 *
+	 * @return void
+	 */
+	public static function custom_style(): void {
+
+		if (!General::in_url([ 'view-order' ])) {
+			return;
+		}
+		?>
+
+		<style>
+			.woocommerce-contract-details div.flex{
+					border: 1px solid var(--ast-border-color);
+					padding: 1rem;
+			}
+		</style>
+		<?php
 	}
 }

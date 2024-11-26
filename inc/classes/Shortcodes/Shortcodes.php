@@ -337,11 +337,12 @@ final class Shortcodes {
 			return $args;
 		}
 
-		$current_user_id = \get_current_user_id();
-		// 如果當前用戶與訂單用戶不同，就不自動填入，防止被猜出其他用戶個資
-		if ($current_user_id !== $user->ID) {
-			return $args;
-		}
+
+		// TODO 如果當前用戶與訂單用戶不同，就不自動填入，防止被猜出其他用戶個資
+		// $current_user_id = \get_current_user_id();
+		// if ($current_user_id !== $user->ID) {
+		// 	return $args;
+		// }
 
 		$value = match ($args['name']) {
 			'user_name' => $user->display_name,
