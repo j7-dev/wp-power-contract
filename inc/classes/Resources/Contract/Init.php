@@ -227,6 +227,37 @@ final class Init {
 		}
 	}
 
+
+	/**
+	 * 取得狀態標籤
+	 *
+	 * @param string $post_status 文章狀態
+	 * @return string
+	 */
+	public static function get_status_tag( string $post_status ): string {
+
+		$info = match ($post_status) {
+			'pending' => [
+				'label' => '審核中',
+				'class' => 'bg-[#f8dda7] text-[#573b00]',
+			],
+			'approved' => [
+				'label' => '已審核',
+				'class' => 'bg-[#c8d7e1] text-[#003d66]',
+			],
+			default => [
+				'label' => '未知狀態',
+				'class' => 'bg-[#f8dda7] text-[#573b00]',
+			],
+		};
+
+		return sprintf(
+			/*html*/'<span class="w-fit h-fit px-2 py-1 text-xs rounded-md %1$s">%2$s</span>',
+			$info['class'],
+			$info['label'],
+			);
+	}
+
 	/**
 	 * 移除 submitdiv metabox
 	 *

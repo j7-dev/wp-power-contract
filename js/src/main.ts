@@ -41,12 +41,12 @@ declare const signature_pad_custom_data: {
 								const $confirmBtn = $(this).parent().find('.pct__signature-confirm')
 
 								$modal[0].showModal()
-									; ($canvas[0] as HTMLCanvasElement).width = $modal.find(
-										'.pc-modal-box',
-									).width() as number
+									; ($canvas[0] as HTMLCanvasElement).width = $modal
+										.find('.pc-modal-box')
+										.width() as number
 									; ($canvas[0] as HTMLCanvasElement).height = Math.min(
 										($modal.height() as number) - 284,
-										($canvas[0] as HTMLCanvasElement).width / 16 * 9
+										(($canvas[0] as HTMLCanvasElement).width / 16) * 9,
 									)
 								const signaturePad = new SignaturePad(
 									$canvas[0] as HTMLCanvasElement,
@@ -120,6 +120,14 @@ declare const signature_pad_custom_data: {
 						formData.append('action', 'create_contract') // WordPress AJAX action
 						formData.append('nonce', nonce) // WordPress 安全檢查用
 						formData.append('contract_template_id', contract_template_id)
+
+						// 如果 url params 有帶 order_id 就 append 到 formData
+						const urlParams = new URLSearchParams(window.location.search)
+						const orderId = urlParams.get('order_id')
+						if (orderId) {
+							formData.append('_order_id', orderId)
+						}
+
 						formData.append(
 							'signature',
 							($('.pct__signature img') as JQuery<HTMLImageElement>).attr(
@@ -140,14 +148,18 @@ declare const signature_pad_custom_data: {
 						// 先將可以編輯的欄位背景變透明
 						$('.can_edit').css('backgroundColor', 'transparent')
 						$('.pct__signature').css('border', 'none')
-						const dataUrl = await domtoimage.toJpeg(contractMain, {
-							quality: 1,
-							bgcolor: '#fff',
-						})
-
-						formData.append('screenshot', dataUrl)
 
 						$submitBtn.find('.pc-loading').show()
+						try {
+							const dataUrl = await domtoimage.toJpeg(contractMain, {
+								quality: 1,
+								bgcolor: '#fff',
+							})
+							formData.append('screenshot', dataUrl)
+						} catch (error) {
+							console.error('error', error)
+							// return
+						}
 
 						// ajax insert data
 						$.post({

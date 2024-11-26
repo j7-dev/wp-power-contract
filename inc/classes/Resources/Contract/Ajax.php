@@ -68,6 +68,15 @@ final class Ajax {
 			'meta_data' => $meta_data
 		] = WP::separator($post_data, 'post');
 
+		ob_start();
+		var_dump(
+			[
+				'data'      => $data,
+				'meta_data' => $meta_data,
+			]
+			);
+		\J7\WpUtils\Classes\ErrorLog::info('' . ob_get_clean());
+
 		$contract_template_name      = \get_the_title( $meta_data['contract_template_id'] );
 		$meta_data['screenshot_url'] = $img_info['url'];
 
