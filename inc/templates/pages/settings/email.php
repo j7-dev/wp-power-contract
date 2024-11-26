@@ -28,8 +28,8 @@ foreach ($emails as $index => $email) {
 	/*html*/'
 	<div data-index="%1$s" class="pct-email-row mb-4 flex items-center gap-x-4">
 		<sl-input name="%2$s" value="%3$s" placeholder="ex: test@gmail.com" size="small" class="w-[20rem]"></sl-input>
-		<sl-icon name="dash-circle"></sl-icon>
-		<sl-icon name="plus-circle"></sl-icon>
+		<sl-icon name="dash-circle" class="cursor-pointer"></sl-icon>
+		<sl-icon name="plus-circle" class="cursor-pointer"></sl-icon>
 	</div>
 	',
 	$index,

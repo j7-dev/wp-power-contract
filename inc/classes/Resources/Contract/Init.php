@@ -35,6 +35,9 @@ final class Init {
 		\add_filter('bulk_actions-edit-' . self::POST_TYPE, [ $this, 'add_bulk_actions' ]);
 		\add_filter('handle_bulk_actions-edit-' . self::POST_TYPE, [ $this, 'handle_bulk_actions' ], 10, 3);
 		\add_action('admin_notices', [ $this, 'display_bulk_action_notices' ]);
+
+		\add_action( 'admin_post_reject_contract', [ __CLASS__, 'handle_reject_contract' ] );
+		\add_action( 'admin_post_approve_contract', [ __CLASS__, 'handle_approve_contract' ] );
 	}
 
 	/**
@@ -86,6 +89,18 @@ final class Init {
 				'show_in_admin_status_list' => true,
 				'label_count'               => _n_noop('Approved <span class="count">(%s)</span>', 'Approved <span class="count">(%s)</span>'),
 			]
+			);
+
+		\register_post_status(
+				'rejected',
+				[
+					'label'                     => _x('Rejected', 'post status'),
+					'public'                    => true,
+					'exclude_from_search'       => false,
+					'show_in_admin_all_list'    => true,
+					'show_in_admin_status_list' => true,
+					'label_count'               => _n_noop('Rejected <span class="count">(%s)</span>', 'Rejected <span class="count">(%s)</span>'),
+				]
 			);
 
 		$args = [
@@ -142,6 +157,15 @@ final class Init {
 				'advanced',
 				'high'
 			);
+
+			\add_meta_box(
+				self::POST_TYPE . '-approval-metabox',
+				__( 'Approval', 'power_contract' ),
+				[ __CLASS__, 'render_approval_meta_box' ],
+				$post_type,
+				'side',
+				'high'
+			);
 		}
 	}
 
@@ -184,6 +208,81 @@ final class Init {
 		echo '</table>';
 	}
 
+
+	/**
+	 * Render approval meta box.
+	 *
+	 * @param \WP_Post $post 文章
+	 */
+	public static function render_approval_meta_box( $post ): void {
+		$post_id     = $post->ID;
+		$post_status = get_post_status( $post_id );
+
+		$reject_url  = admin_url( 'admin-post.php?action=reject_contract&post_id=' . $post_id );
+		$approve_url = admin_url( 'admin-post.php?action=approve_contract&post_id=' . $post_id );
+
+		$reject_button_class  = 'button-secondary';
+		$approve_button_class = 'button-primary';
+
+		if ( 'rejected' === $post_status ) {
+			$reject_button_class .= ' disabled';
+		} elseif ( 'approved' === $post_status ) {
+			$approve_button_class .= ' disabled';
+		}
+		?>
+		<div class="misc-pub-section">
+			<div id="minor-publishing-actions">
+				<div id="save-action">
+					<a href="<?php echo esc_url( $reject_url ); ?>" class="button <?php echo esc_attr( $reject_button_class ); ?>">Reject</a>
+					<a href="<?php echo esc_url( $approve_url ); ?>" class="button <?php echo esc_attr( $approve_button_class ); ?>">Approve</a>
+				</div>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Handle reject contract action.
+	 */
+	public static function handle_reject_contract() {
+		if ( isset( $_GET['post_id'] ) && ! empty( $_GET['post_id'] ) ) {
+			$post_id = intval( $_GET['post_id'] );
+			$post    = get_post( $post_id );
+
+			if ( $post && 'contract' === $post->post_type ) {
+				$updated_post = [
+					'ID'          => $post_id,
+					'post_status' => 'rejected',
+				];
+				wp_update_post( $updated_post );
+			}
+		}
+
+		wp_safe_redirect( admin_url( 'edit.php?post_type=contract' ) );
+		exit;
+	}
+
+	/**
+	 * Handle approve contract action.
+	 */
+	public static function handle_approve_contract() {
+		if ( isset( $_GET['post_id'] ) && ! empty( $_GET['post_id'] ) ) {
+			$post_id = intval( $_GET['post_id'] );
+			$post    = get_post( $post_id );
+
+			if ( $post && 'contract' === $post->post_type ) {
+				$updated_post = [
+					'ID'          => $post_id,
+					'post_status' => 'approved',
+				];
+				wp_update_post( $updated_post );
+			}
+		}
+
+		wp_safe_redirect( admin_url( 'edit.php?post_type=contract' ) );
+		exit;
+	}
+
 	/**
 	 * 新增 status 欄位
 	 *
@@ -213,6 +312,7 @@ final class Init {
 			$class = match ($post_status) {
 				'pending' => 'bg-[#f8dda7] text-[#573b00]',
 				'approved' => 'bg-[#c8d7e1] text-[#003d66]',
+				'rejected' => 'bg-[#eba3a3] text-[#570000]',
 				default => 'bg-[#f8dda7] text-[#573b00]',
 			};
 
@@ -248,6 +348,10 @@ final class Init {
 				'label' => '已審核',
 				'class' => 'bg-[#c8d7e1] text-[#003d66]',
 			],
+			'rejected' => [
+				'label' => '已拒絕',
+				'class' => 'bg-[#eba3a3] text-[#570000]',
+			],
 			default => [
 				'label' => '未知狀態',
 				'class' => 'bg-[#f8dda7] text-[#573b00]',
@@ -279,6 +383,8 @@ final class Init {
 	public function add_bulk_actions( array $bulk_actions ): array {
 		$bulk_actions['change-to-pending']  = __('Change to Pending', 'power_contract');
 		$bulk_actions['change-to-approved'] = __('Change to Approved', 'power_contract');
+		$bulk_actions['change-to-rejected'] = __('Change to Rejected', 'power_contract');
+
 		return $bulk_actions;
 	}
 
@@ -313,6 +419,17 @@ final class Init {
 					);
 			}
 			$redirect_url = \add_query_arg('changed-to-approved', \count($post_ids), $redirect_url);
+		}
+
+		if ('change-to-rejected' === $action) {
+			foreach ($post_ids as $post_id) {
+				\wp_update_post(
+					[
+						'ID'          => $post_id,
+						'post_status' => 'rejected',
+					]
+					);
+			}
 		}
 
 		return $redirect_url;
@@ -358,7 +475,7 @@ final class Init {
 
 		// add signed_at
 		// get local time
-		$post = \get_post( $post_id );
+		$post                   = \get_post( $post_id );
 		$signed_at_timestamp    = \get_the_date( 'U', $post );
 		$signed_at              = \wp_date( 'Y-m-d H:i:s', $signed_at_timestamp );
 		$post_meta['signed_at'] = [ $signed_at ];

@@ -52,7 +52,7 @@ final class MyAccount {
 			[
 				'post_type'   => Contract::POST_TYPE,
 				'numberposts' => -1,
-				'post_status' => [ 'approved', 'pending' ],
+				'post_status' => [ 'approved', 'pending', 'rejected' ],
 				'meta_key'    => '_order_id',
 				'meta_value'  => $order_id,
 			]
