@@ -4,6 +4,7 @@
  *
  * @see Asana https://app.asana.com/0/1208673658605052/1208713252336840/f
  * @see Bonnie API doc https://docs.botbonnie.com/jiao-xue-fan-li/ru-he-shi-yong-json-xun-xi#1.-json-xun-xi-fan-li
+ * @see 注意❗❗ 有320字限制超過的話訊息會直接吃掉，也不會報錯❗❗  https://docs.botbonnie.com/jiao-xue-fan-li/ru-he-shi-yong-json-xun-xi/zhi-yuan-de-xun-xi-ge-shi
  *
  * 之前請 Oberon 協助加了
  * $buttons_item['value'] = apply_filters( 'bot_bonnie_button_url', $url, $value, $this->request );
@@ -35,21 +36,25 @@ final class Bonnie {
 	/**
 	 * 訂單完成後推播的 Bonnie 模組 ID
 	 *
+	 * @deprecated 使用訊息推播，不是推模組
 	 * @var string
 	 */
 	private $bonnie_module_id = 'module-lzT2zotAta';
+
+
+	/**
+	 * 訂單完成後推播的合約模板 contract_template_id
+	 *
+	 * @var int
+	 */
+	private $contract_template_id = 470975;
 
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
-		\add_filter('bot_bonnie_button_url', [ __CLASS__, 'add_params_to_bonnie_button_url' ], 10, 3);
+		// \add_filter('bot_bonnie_button_url', [ $this, 'add_params_to_bonnie_button_url' ], 10, 3);
 		\add_action( 'woocommerce_order_status_completed', [ $this, 'push_bonnie_module' ], 10, 1 );
-
-		if ('local' === \wp_get_environment_type()) {
-			// 測試模組
-			$this->bonnie_module_id = 'module-lzT2zotAta';
-		}
 	}
 
 	/** phpcs:disable
@@ -77,21 +82,23 @@ final class Bonnie {
 	 * phpcs:enable
 	 * @return string 按鈕的 url
 	 */
-	public static function add_params_to_bonnie_button_url( $url, $value, $request ) {
+	public function add_params_to_bonnie_button_url( $url, $value, $request ) {
 		// 如果 $url 不包含 /contract_template/ 就 return
 		if (strpos($url, Init::POST_TYPE) === false) {
 			return $url;
 		}
-
-		ob_start();
-		var_dump($request->get_query_params());
-		\J7\WpUtils\Classes\ErrorLog::info('get_query_params ' . ob_get_clean());
 
 		$body_params = $request->get_json_params();
 		// 用 bonnie_bot_raw_id 找 user
 		$bonnie_bot_raw_id = $body_params['bot_raw_uid'] ?? '';
 		if (!$bonnie_bot_raw_id) {
 			return $url;
+		}
+
+		// 如果是在 local 環境，就使用測試模組
+		if ('local' === \wp_get_environment_type()) {
+			// 測試模組
+			$this->bonnie_module_id = 'module-lzT2zotAta';
 		}
 
 		$users = \get_users(
@@ -146,10 +153,32 @@ final class Bonnie {
 		// 暫時性將 order_id 存到用戶的 meta 裡
 		\update_user_meta($customer->ID, 'order_id_tmp', $order_id);
 
+		// bonnie 上的 user id
 		$bonnie_bot_raw_id = \get_user_meta($customer->ID, 'bonnie_bot_raw_id', true);
-		$bot_pid           = \Bonnie\Api\Bonnie_Api::get_bot_pid($order_id);
-		$push              = new \Bonnie\Api\Bonnie_Push( $bonnie_bot_raw_id, $bot_pid );
-		$push->add_module( $this->bonnie_module_id );
+
+		// bot_pid = LINE OA id，本地環境實為了方便測試，固定為 281jvjai
+		$bot_pid = 'local' === \wp_get_environment_type() ? '281jvjai' : \Bonnie\Api\Bonnie_Api::get_bot_pid($order_id);
+
+		$push = new \Bonnie\Api\Bonnie_Push( $bonnie_bot_raw_id, $bot_pid );
+
+		$permalink = \get_permalink($this->contract_template_id);
+		$permalink = \add_query_arg(
+			[
+				'order_id' => $order_id,
+			],
+			$permalink
+		);
+
+		$result = $push->add_message(
+			'已經收到您的訂單，點下方完成簽約',
+			[
+				[
+					'title' => '立即線上簽約 →',
+					'type'  => 'web_url',
+					'value' => $permalink,
+				],
+			]
+		);
 	}
 
 
@@ -176,5 +205,40 @@ final class Bonnie {
 		}
 
 		return $full_address;
+	}
+
+	/**
+	 * 取得合約模板帶上 URL params 的完整連結
+	 *
+	 * @deprecated 有字數限制，所以帶 order_id 就好
+	 *
+	 * @param int $order_id 訂單 ID
+	 * @return string 合約模板帶參數的完整連結
+	 */
+	private function get_contract_permalink_with_params( int $order_id ) {
+		$order = \wc_get_order($order_id);
+		$user  = $order->get_user();
+		if (!$user) {
+			return '';
+		}
+
+		// 取得 姓名、電話、價格、地址
+		$name         = $user->display_name;
+		$phone        = \get_user_meta($user->ID, 'billing_phone', true);
+		$price        = '';
+		$full_address = self::get_full_address($user->ID, 'shipping');
+
+		$permalink             = \get_permalink($this->contract_template_id);
+		$permalink_with_params = \add_query_arg(
+			[
+				'name'         => $name,
+				'phone'        => $phone,
+				'price'        => $price,
+				'full_address' => $full_address,
+			],
+			$permalink
+		);
+
+		return $permalink_with_params;
 	}
 }
