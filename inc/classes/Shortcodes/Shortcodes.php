@@ -7,6 +7,8 @@ declare(strict_types=1);
 
 namespace J7\PowerContract\Shortcodes;
 
+use J7\PowerContract\Utils\Base;
+
 if (class_exists('J7\PowerContract\Shortcodes\Shortcodes')) {
 	return;
 }
@@ -89,6 +91,8 @@ final class Shortcodes {
 		foreach (self::$shortcodes as $shortcode) {
 			\add_shortcode($shortcode, [ __CLASS__, "{$shortcode}_callback" ]);
 		}
+
+		\add_filter('power_contract_input_args', [ __CLASS__, 'set_default_value' ], 10, 1);
 	}
 
 
@@ -282,5 +286,44 @@ final class Shortcodes {
 		}
 
 		return $formatted_date;
+	}
+
+
+
+
+
+	/**
+	 * 設定預設值
+	 *
+	 * @param array $args 輸入框的參數
+	 * @return array 輸入框的參數
+	 */
+	public static function set_default_value( array $args ): array {
+		$order_id = $_GET['order_id'] ?? null; // phpcs:ignore
+		if (!$order_id) {
+			return $args;
+		}
+
+		$order = \wc_get_order($order_id);
+		if (!$order) {
+			return $args;
+		}
+
+		$user = $order->get_user();
+		if (!$user) {
+			return $args;
+		}
+
+		$value = match ($args['name']) {
+			'user_name' => $user->display_name,
+			'user_address' => Base::get_full_address($user->ID, 'shipping'),
+			'user_phone' => \get_user_meta($user->ID, 'billing_phone', true),
+			'contract_amount' => $order->get_total(),
+			default => '',
+		};
+
+		$args['value'] = $value;
+
+		return $args;
 	}
 }

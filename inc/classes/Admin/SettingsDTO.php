@@ -42,6 +42,24 @@ final class SettingsDTO extends DTO {
 	 */
 	public $ajax_signed_btn_link;
 
+	/**
+	 * @var bool
+	 * 是否自動顯示訂單資訊
+	 */
+	public $display_order_info = false;
+
+	/**
+	 * @var bool
+	 * 是否在結帳前顯示合約
+	 */
+	public $display_contract_before_checkout = false;
+
+	/**
+	 * @var bool
+	 * 是否在結帳後、感謝頁面前顯示合約
+	 */
+	public $display_contract_after_checkout = false;
+
 
 	/**
 	 * 取得已經從 wp_option 取得資料後的實例
@@ -54,5 +72,15 @@ final class SettingsDTO extends DTO {
 			$setting_array = [];
 		}
 		return self::instance($setting_array);
+	}
+
+	/**
+	 * 取得 input name 表單用
+	 *
+	 * @param string $key 欄位名稱
+	 * @return string 欄位名稱
+	 */
+	public static function get_field_name( string $key ): string {
+		return Settings::SETTINGS_KEY . "[$key]";
 	}
 }

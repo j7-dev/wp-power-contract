@@ -44,4 +44,54 @@ abstract class Base {
 			default => $key,
 		};
 	}
+
+	/**
+	 * 取得用戶的完整地址
+	 *
+	 * @param int    $user_id 用戶 ID
+	 * @param string $type 地址類型 billing 或 shipping
+	 * @return string 用戶的完整地址
+	 */
+	public static function get_full_address( $user_id, $type = 'billing' ) {
+
+		$fields = [
+			"_{$type}_postcode",
+			"_{$type}_state",
+			"_{$type}_city",
+			"_{$type}_address_1",
+			"_{$type}_address_2",
+		];
+
+		$full_address = '';
+		foreach ($fields as $field) {
+			$full_address .= \get_user_meta($user_id, $field, true);
+		}
+
+		// 如果 user meta 有值，就 return full address
+		if ($full_address) {
+			return $full_address;
+		}
+
+		// 如果 order_id 有值，就從 order 取得 full address
+		$order_id = $_GET['order_id'] ?? null; // phpcs:ignore
+		if (!$order_id) {
+			return $full_address;
+		}
+
+		$order = \wc_get_order($order_id);
+		if (!$order) {
+			return $full_address;
+		}
+
+		$methods = array_map(fn( $field ) => "get{$field}", $fields);
+
+		$full_address = '';
+		foreach ($methods as $method) {
+			if (\method_exists($order, $method)) {
+				$full_address .= $order->{$method}();
+			}
+		}
+
+		return $full_address;
+	}
 }
