@@ -12,7 +12,7 @@ use J7\PowerContract\Resources\ContractTemplate\Init as ContractTemplate;
 
 
 
-if (class_exists('J7\PowerContract\Resources\Contract')) {
+if (class_exists('J7\PowerContract\Resources\Contract\Init')) {
 	return;
 }
 /**

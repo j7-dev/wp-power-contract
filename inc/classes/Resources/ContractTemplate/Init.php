@@ -11,7 +11,7 @@ use J7\PowerContract\Plugin;
 use J7\PowerContract\Shortcodes\Shortcodes;
 use J7\WpUtils\Classes\WP;
 
-if (class_exists('J7\PowerContract\Resources\ContractTemplate')) {
+if (class_exists('J7\PowerContract\Resources\ContractTemplate\Init')) {
 	return;
 }
 /**

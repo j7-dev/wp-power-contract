@@ -11,7 +11,7 @@ use J7\PowerContract\Plugin;
 use J7\WpUtils\Classes\WP;
 use J7\WpUtils\Classes\General;
 
-if (class_exists('J7\PowerContract\Resources\Contract')) {
+if (class_exists('J7\PowerContract\Resources\Contract\Ajax')) {
 	return;
 }
 /**
