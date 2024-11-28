@@ -4,7 +4,7 @@
  *
  * @see Asana https://app.asana.com/0/1208673658605052/1208713252336840/f
  * @see Bonnie API doc https://docs.botbonnie.com/jiao-xue-fan-li/ru-he-shi-yong-json-xun-xi#1.-json-xun-xi-fan-li
- * @see 注意❗❗ 有320字限制超過的話訊息會直接吃掉，也不會報錯❗❗  https://docs.botbonnie.com/jiao-xue-fan-li/ru-he-shi-yong-json-xun-xi/zhi-yuan-de-xun-xi-ge-shi
+ * @see 注意❗❗ LINE 有320字限制超過的話訊息會直接吃掉，也不會報錯❗❗  https://docs.botbonnie.com/jiao-xue-fan-li/ru-he-shi-yong-json-xun-xi/zhi-yuan-de-xun-xi-ge-shi
  *
  * 之前請 Oberon 協助加了
  * $buttons_item['value'] = apply_filters( 'bot_bonnie_button_url', $url, $value, $this->request );
