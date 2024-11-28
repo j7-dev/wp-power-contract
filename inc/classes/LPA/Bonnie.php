@@ -154,6 +154,32 @@ final class Bonnie {
 			return;
 		}
 
+		$items = $order->get_items();
+
+		$include_deposit = false;
+		foreach ($items as $item) {
+			/** @var \WC_Order_Item_Product $item */
+			$product_id = $item->get_product_id();
+			// 判斷是否為訂金商品(包含訂金分類)
+			$product_cats = \get_the_terms( $product_id, 'product_cat' );
+			foreach ( $product_cats as $product_cat ) {
+				if ( 'deposit' === $product_cat->slug ) {
+					$include_deposit = true;
+					break;
+				}
+			}
+
+			// 只要有訂金商品，就中斷
+			if ($include_deposit) {
+				break;
+			}
+		}
+
+		// 訂金商品不需要簽約
+		if ( $include_deposit ) {
+			return;
+		}
+
 		// 暫時性將 order_id 存到用戶的 meta 裡
 		\update_user_meta($customer->ID, 'order_id_tmp', $order_id);
 
