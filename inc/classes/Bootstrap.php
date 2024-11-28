@@ -23,6 +23,7 @@ final class Bootstrap {
 		Resources\ContractTemplate\Init::instance();
 		Resources\Contract\Init::instance();
 		Resources\Contract\Ajax::instance();
+		Resources\Contract\LifeCycle::instance();
 		Shortcodes\Shortcodes::instance();
 		Admin\Settings::instance();
 		Email\Email::instance();
