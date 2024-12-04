@@ -33,7 +33,7 @@ final class Bonnie {
 	/**
 	 * 訂單完成後推播的 Bonnie 模組 ID
 	 *
-	 * @deprecated 使用訊息推播，不是推模組
+	 * @deprecated 使用訊息推播，不是推模組，所以目前不會用到
 	 * @var string
 	 */
 	private $bonnie_module_id = 'module-lzT2zotAta';
@@ -59,6 +59,7 @@ final class Bonnie {
 		// \add_filter('bot_bonnie_button_url', [ $this, 'add_params_to_bonnie_button_url' ], 10, 3);
 		\add_action( 'woocommerce_order_status_completed', [ $this, 'push_bonnie_module' ], 10, 1 );
 		\add_action( 'wp_head', [ __CLASS__, 'custom_style' ], 99 );
+		// \add_action('power_contract_contract_created', [ $this, 'push_bonnie_module' ], 10, 2);
 	}
 
 	/** phpcs:disable
@@ -144,6 +145,7 @@ final class Bonnie {
 
 	/**
 	 * 推播 Bonnie 模組
+	 * 訂單完成後，推 LINE 訊息給用戶線上簽約網址
 	 *
 	 * @param int $order_id 訂單 ID
 	 */
