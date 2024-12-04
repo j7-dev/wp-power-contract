@@ -7,9 +7,6 @@ declare (strict_types = 1);
 
 namespace J7\PowerContract\Utils;
 
-use J7\PowerContract\Admin\Settings;
-use J7\PowerContract\Admin\SettingsDTO;
-
 if (class_exists('J7\PowerContract\Utils\Base')) {
 	return;
 }
@@ -93,5 +90,14 @@ abstract class Base {
 		}
 
 		return $full_address;
+	}
+
+	/**
+	 * 是否啟用 WooCommerce
+	 *
+	 * @return bool
+	 */
+	public static function wc_enabled(): bool {
+		return class_exists('WooCommerce', false);
 	}
 }

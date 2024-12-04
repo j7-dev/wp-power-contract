@@ -29,7 +29,7 @@ final class Init {
 	public function __construct() {
 		\add_action( 'init', [ __CLASS__, 'register_cpt' ] );
 		\add_action( 'load-post.php', [ __CLASS__, 'init_metabox' ] );
-		\add_filter('manage_' . self::POST_TYPE . '_posts_columns', [ $this, 'add_status_column' ]);
+		\add_filter('manage_' . self::POST_TYPE . '_posts_columns', [ $this, 'add_columns' ]);
 		\add_action('manage_' . self::POST_TYPE . '_posts_custom_column', [ $this, 'render_column' ], 10, 2);
 		\add_action('admin_menu', [ $this, 'remove_submitdiv_metabox' ]);
 		\add_filter('bulk_actions-edit-' . self::POST_TYPE, [ $this, 'add_bulk_actions' ]);
@@ -284,18 +284,27 @@ final class Init {
 	}
 
 	/**
-	 * 新增 status 欄位
+	 * 新增欄位
 	 *
 	 * @param array $columns 欄位
 	 * @return array
 	 */
-	public function add_status_column( array $columns ): array {
+	public function add_columns( array $columns ): array {
 		// status 放在 title 後面
-		$columns = \array_slice($columns, 0, 2) + [
-			'user_name' => __('name', 'power_contract'),
-			'status'    => __('Status', 'power_contract'),
-		] + \array_slice($columns, 2);
-		return $columns;
+		$new_columns = [];
+
+		foreach ($columns as $key => $column) {
+			$new_columns[ $key ] = $column;
+			if ('title' === $key) {
+				$new_columns['user_name'] = __('name', 'power_contract');
+				$new_columns['status']    = __('Status', 'power_contract');
+				if (Base::wc_enabled()) {
+					$new_columns['order_id'] = __('Order ID', 'power_contract');
+				}
+			}
+		}
+
+		return $new_columns;
 	}
 
 	/**
@@ -327,6 +336,18 @@ final class Init {
 		if ('user_name' === $column) {
 			$user_name = \get_post_meta($post_id, 'user_name', true);
 			echo $user_name;
+		}
+
+		$order_id        = \get_post_meta($post_id, '_order_id', true);
+		if ('order_id' === $column && $order_id) {
+			$order_edit_link = \get_edit_post_link($order_id);
+			printf(
+			/*html*/'
+			<a href="%1$s" target="_blank">%2$s</a>
+			',
+			$order_edit_link,
+			"#{$order_id}"
+			);
 		}
 	}
 

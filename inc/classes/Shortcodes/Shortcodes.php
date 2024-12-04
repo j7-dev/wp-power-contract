@@ -337,14 +337,18 @@ final class Shortcodes {
 			return $args;
 		}
 
-		$current_user_id = \get_current_user_id();
-		// 如果當前用戶與訂單用戶不同，就不自動填入，防止被猜出其他用戶個資
-		if ($current_user_id !== $user->ID) {
-			return $args;
-		}
+		// TODO 如果當前用戶與訂單用戶不同，就不自動填入，防止被猜出其他用戶個資
+		// $current_user_id = \get_current_user_id();
+		// if ($current_user_id !== $user->ID) {
+		// return $args;
+		// }
+
+		$first_name = $order->get_billing_first_name();
+		$last_name  = $order->get_billing_last_name();
+		$full_name  = "{$last_name}{$first_name}";
 
 		$value = match ($args['name']) {
-			'user_name' => $user->display_name,
+			'user_name' => $full_name,
 			'user_address' => Base::get_full_address($user->ID, 'shipping'),
 			'user_phone' => \get_user_meta($user->ID, 'billing_phone', true),
 			'contract_amount' => $order->get_total(),
