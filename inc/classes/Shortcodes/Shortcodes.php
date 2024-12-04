@@ -9,6 +9,7 @@ namespace J7\PowerContract\Shortcodes;
 
 use J7\PowerContract\Utils\Base;
 use J7\PowerContract\Admin\SettingsDTO;
+use J7\WpUtils\Classes\General;
 
 if (class_exists('J7\PowerContract\Shortcodes\Shortcodes')) {
 	return;
@@ -29,6 +30,7 @@ final class Shortcodes {
 		'pct_seal',
 		'pct_signature',
 		'pct_date',
+		'pct_ip',
 	];
 
 
@@ -82,6 +84,11 @@ final class Shortcodes {
 			例如：<code>[pct_date format="西元 Y 年 m 月 d 日" base="ad"]</code> 會顯示"西元 2024 年 11 月 23 日"<br>
 			<code>base</code> 如果輸入 <code>ad</code> 則會顯示西元日期，如果輸入 <code>tw</code> 則會顯示中華民國日期<br>
 			<code>format</code> 可以輸入中文字加上<code>Y</code>、<code>m</code>、<code>d</code> 來顯示年月日',
+		],
+		'pct_ip' => [
+			'shortcode'   => '[pct_ip]',
+			'label'       => 'IP',
+			'description' => '顯示用戶的 IP',
 		],
 	];
 
@@ -289,6 +296,16 @@ final class Shortcodes {
 		return $formatted_date;
 	}
 
+
+	/**
+	 * 顯示 IP
+	 *
+	 * @param array|null $atts 短碼參數
+	 * @return string
+	 */
+	public static function pct_ip_callback( ?array $atts ): string {
+		return General::get_client_ip();
+	}
 
 
 
