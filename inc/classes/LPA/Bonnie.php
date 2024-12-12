@@ -195,8 +195,9 @@ final class Bonnie {
 
 		$push = new \Bonnie\Api\Bonnie_Push( $bonnie_bot_raw_id, $bot_pid );
 
-		$permalink = \get_permalink($this->contract_template_id);
-		$permalink = \add_query_arg(
+		$contract_template_id = $this->get_contract_template_id();
+		$permalink            = \get_permalink($contract_template_id);
+		$permalink            = \add_query_arg(
 			[
 				'order_id' => $order_id,
 			],
@@ -329,5 +330,15 @@ final class Bonnie {
 			}
 		</style>
 		<?php
+	}
+
+	/**
+	 * 取得合約模板 ID
+	 * 可能會有不同規則來顯示不同的模板
+	 *
+	 * @return int
+	 */
+	private function get_contract_template_id(): int {
+		return $this->contract_template_id;
 	}
 }
