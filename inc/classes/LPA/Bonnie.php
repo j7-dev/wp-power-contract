@@ -55,11 +55,14 @@ final class Bonnie {
 		if (!class_exists('\Bonnie\Api\Bonnie_Api')) {
 			return;
 		}
-
-		// \add_filter('bot_bonnie_button_url', [ $this, 'add_params_to_bonnie_button_url' ], 10, 3);
-		\add_action( 'woocommerce_order_status_completed', [ $this, 'push_bonnie_module' ], 10, 1 );
 		\add_action( 'wp_head', [ __CLASS__, 'custom_style' ], 99 );
-		// \add_action('power_contract_contract_created', [ $this, 'push_bonnie_module' ], 10, 2);
+		// \add_filter('bot_bonnie_button_url', [ $this, 'add_params_to_bonnie_button_url' ], 10, 3);
+
+		// 訂單完成後推播簽約訊息
+		\add_action( 'woocommerce_order_status_completed', [ $this, 'push_bonnie_module_for_sign' ], 10, 1 );
+
+		// 簽約完成後推播訊息給 用戶
+		\add_action('power_contract_contract_created', [ $this, 'push_bonnie_module_to_user_for_archive' ], 10, 2);
 	}
 
 	/** phpcs:disable
@@ -149,15 +152,14 @@ final class Bonnie {
 	 *
 	 * @param int $order_id 訂單 ID
 	 */
-	public function push_bonnie_module( $order_id ) {
+	public function push_bonnie_module_for_sign( $order_id ) {
 		$order    = \wc_get_order($order_id);
 		$customer = $order->get_user();
 		if (!$customer) {
 			return;
 		}
 
-		$items = $order->get_items();
-
+		$items           = $order->get_items();
 		$include_deposit = false;
 		foreach ($items as $item) {
 			/** @var \WC_Order_Item_Product $item */
@@ -213,6 +215,40 @@ final class Bonnie {
 		);
 	}
 
+
+	/**
+	 * 推播 Bonnie 模組
+	 * 簽約完成後，推 LINE 訊息給用戶留底
+	 *
+	 * @param int                  $contract_id 合約 ID
+	 * @param array<string, mixed> $args 合約資料
+	 */
+	public function push_bonnie_module_to_user_for_archive( $contract_id, $args ) {
+
+		$author_id = \get_post_field('post_author', $contract_id);
+
+		// bonnie 上的 user id
+		$bonnie_bot_raw_id = \get_user_meta($author_id, 'bonnie_bot_raw_id', true);
+
+		// 合約連結的訂單 id
+		$order_id = \get_post_meta($contract_id, '_order_id', true);
+
+		$screenshot_url = \get_post_meta($contract_id, 'screenshot_url', true);
+		if (!$screenshot_url) {
+			return;
+		}
+
+		// bot_pid = LINE OA id，本地環境實為了方便測試，固定為 281jvjai
+		$bot_pid = 'local' === \wp_get_environment_type() ? '281jvjai' : \Bonnie\Api\Bonnie_Api::get_bot_pid($order_id);
+
+		$bonnie_push_instance                  = new BonniePush( $bonnie_bot_raw_id, $bot_pid );
+		$bonnie_push_instance->body['message'] = [
+			'type'     => 'image',
+			'imageUrl' => $screenshot_url,
+		];
+
+		$result = $bonnie_push_instance->process();
+	}
 
 	/**
 	 * 取得用戶的完整地址
