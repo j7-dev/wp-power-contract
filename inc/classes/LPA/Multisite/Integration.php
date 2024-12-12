@@ -42,11 +42,15 @@ final class Integration {
 		// 修改查詢以包含所有子站點的文章
 		\add_filter('posts_request', [ $this, 'modify_posts_query' ], 10, 2);
 
-		// 為每個支援的文章類型添加部落格列
+		// 為每個支援的文章類型添加部落格列和修改連結
 		foreach ($this->supported_post_types as $post_type) {
 			\add_filter("manage_{$post_type}_posts_columns", [ $this, 'add_blog_column' ]);
 			\add_action("manage_{$post_type}_posts_custom_column", [ $this, 'display_blog_info' ], 10, 2);
 			\add_action("save_post_{$post_type}", [ $this, 'save_blog_id' ], 10, 3);
+
+			// 修改文章列表的連結
+			\add_filter('post_row_actions', [ $this, 'modify_row_actions' ], 10, 2);
+			\add_filter('page_row_actions', [ $this, 'modify_row_actions' ], 10, 2);
 		}
 	}
 
@@ -61,7 +65,7 @@ final class Integration {
 		global $wpdb;
 
 		// 只修改特定的後台頁面和文章類型的查詢
-		if (!is_admin() ||
+		if (!\is_admin() ||
 			!isset($_GET['post_type']) ||
 			!in_array($_GET['post_type'], $this->supported_post_types, true) ||
 			!$query->is_main_query()
@@ -79,8 +83,7 @@ final class Integration {
 		// 構建 UNION 查詢
 		$queries = [];
 		foreach ($blog_ids as $blog_id) {
-			$prefix = $wpdb->get_blog_prefix($blog_id);
-			// phpcs:disable
+			$prefix    = $wpdb->get_blog_prefix($blog_id);
 			$queries[] = $wpdb->prepare(
 				"SELECT
 					p.*,
@@ -91,11 +94,7 @@ final class Integration {
 				$blog_id,
 				$_GET['post_type']
 			);
-			// phpcs:enable
 		}
-
-		// 記錄 SQL 查詢以便調試
-		\J7\WpUtils\Classes\ErrorLog::info('Modified SQL Query: ' . implode(' UNION ', $queries));
 
 		return implode(' UNION ', $queries);
 	}
@@ -130,11 +129,11 @@ final class Integration {
 			return;
 		}
 
-		$blog_id = get_post_meta($post_id, '_blog_id', true);
+		$blog_id = \get_post_meta($post_id, '_blog_id', true);
 		if ($blog_id) {
-			$blog_details = get_blog_details($blog_id);
+			$blog_details = \get_blog_details($blog_id);
 			if ($blog_details) {
-				echo esc_html($blog_details->blogname);
+				echo \esc_html($blog_details->blogname);
 			}
 		}
 	}
@@ -151,7 +150,100 @@ final class Integration {
 			return;
 		}
 
-		$blog_id = get_current_blog_id();
-		update_post_meta($post_id, '_blog_id', $blog_id);
+		$blog_id = \get_current_blog_id();
+		\update_post_meta($post_id, '_blog_id', $blog_id);
+	}
+
+	/**
+	 * 修改文章列表的操作連結
+	 *
+	 * @param array    $actions 操作連結陣列
+	 * @param \WP_Post $post 文章物件
+	 * @return array 修改後的操作連結
+	 */
+	public function modify_row_actions( $actions, $post ) {
+		global $wpdb;
+
+		// 檢查是否為支援的文章類型
+		if (!in_array($post->post_type, $this->supported_post_types, true)) {
+			return $actions;
+		}
+
+		// 獲取所有部落格 ID
+		$blog_ids = \get_sites(
+			[
+				'fields' => 'ids',
+			]
+		);
+
+		// 構建 UNION 查詢來找到文章所屬的部落格
+		$queries = [];
+		foreach ($blog_ids as $blog_id) {
+			$prefix    = $wpdb->get_blog_prefix($blog_id);
+			$queries[] = $wpdb->prepare(
+				"SELECT %d as blog_id FROM {$prefix}posts WHERE ID = %d", // phpcs:ignore
+				$blog_id,
+				$post->ID
+			);
+		}
+
+		// 執行 UNION 查詢
+		$blog_id = (string) $wpdb->get_var(implode(' UNION ', $queries)); // phpcs:ignore
+
+		// 如果不是當前部落格的文章，修改連結
+		if ($blog_id && $blog_id !== (string) \get_current_blog_id()) {
+			// 切換到文章所屬的部落格
+			\switch_to_blog($blog_id);
+
+			// 獲取各種連結
+			$edit_link   = \get_edit_post_link($post->ID);
+			$delete_link = \get_delete_post_link($post->ID);
+
+			$title = \get_the_title($post->ID);
+
+			// 修正 permalink 結構
+			$permalink_structure = \get_option('permalink_structure');
+			if (empty($permalink_structure)) {
+				$view_link = \add_query_arg('p', $post->ID, \get_home_url($blog_id));
+			} else {
+				$view_link = sprintf(
+					'%s/%s/%s/',
+					\untrailingslashit(\get_home_url($blog_id)),
+					$post->post_type,
+					$post->post_name
+				);
+			}
+
+			// 重設回當前部落格
+			\restore_current_blog();
+
+			// 修改所有操作連結
+			$new_actions = [];
+
+			// 編輯
+			$new_actions['edit'] = sprintf(
+				'<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
+				\esc_url($edit_link),
+				\esc_html__('編輯', 'power-contract')
+			);
+
+			// 移至垃圾桶
+			$new_actions['trash'] = sprintf(
+				'<a href="%s" target="_blank" rel="noopener noreferrer" class="submitdelete">%s</a>',
+				\esc_url($delete_link),
+				\esc_html__('移至垃圾桶', 'power-contract')
+			);
+
+			// 檢視
+			$new_actions['view'] = sprintf(
+				'<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
+				\esc_url($view_link),
+				\esc_html__('檢視', 'power-contract')
+			);
+
+			return $new_actions;
+		}
+
+		return $actions;
 	}
 }
