@@ -122,7 +122,7 @@ final class Init {
 			'rest_base'             => '',
 			'show_in_menu'          => 'edit.php?post_type=' . ContractTemplate::POST_TYPE,
 			'capability_type'       => 'post',
-			'supports'              => [ 'title' ],
+			'supports'              => [ 'title', 'author' ],
 			'map_meta_cap'          => true,
 			'taxonomies'            => [],
 			'rest_controller_class' => 'WP_REST_Posts_Controller',
@@ -338,7 +338,7 @@ final class Init {
 			echo $user_name;
 		}
 
-		$order_id        = \get_post_meta($post_id, '_order_id', true);
+		$order_id = \get_post_meta($post_id, '_order_id', true);
 		if ('order_id' === $column && $order_id) {
 			$order_edit_link = \get_edit_post_link($order_id);
 			printf(
