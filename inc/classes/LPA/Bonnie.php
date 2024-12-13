@@ -53,14 +53,6 @@ final class Bonnie {
 	 */
 	public function __construct() {
 
-		// TEST 測試特定 hook 記得刪除
-		\add_action(
-			'init',
-			function () {
-				// \do_action('woocommerce_order_status_completed', 455199);
-			}
-			);
-
 		// 如果沒有安裝 Oberon 的 bonnie 外掛，就 return
 		if (!class_exists('\Bonnie\Api\Bonnie_Api')) {
 			return;

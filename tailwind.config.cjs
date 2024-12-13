@@ -59,7 +59,7 @@ module.exports = {
 			addUtilities(newUtilities, ['responsive', 'hover'])
 		},
 	],
-	safelist: [],
+	safelist: ['!bg-transparent', 'bg-transparent'],
 	blocklist: [
 		'fixed',
 		'columns-1',
