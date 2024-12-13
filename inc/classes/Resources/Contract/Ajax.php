@@ -113,9 +113,8 @@ final class Ajax {
 	 * @return string
 	 */
 	public static function get_redirect_url( ?int $order_id, ?string $redirect ): string {
-		$order = null;
-		if ($order_id ) {
-			$order = \wc_get_order( $order_id );
+		$order = $order_id ? \wc_get_order( $order_id ) : null;
+		if ($order ) {
 			$order->update_meta_data( 'is_signed', 'yes' );
 			$order->save();
 		}
