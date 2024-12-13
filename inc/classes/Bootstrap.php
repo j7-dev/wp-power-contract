@@ -29,6 +29,7 @@ final class Bootstrap {
 		Email\Email::instance();
 		LPA\Bonnie::instance();
 		LPA\Multisite\Integration::instance();
+		LPA\Multisite\Metabox::instance();
 		if (class_exists('WooCommerce')) {
 			Woocommerce\FrontEnd\Checkout::instance();
 			Woocommerce\FrontEnd\MyAccount::instance();
