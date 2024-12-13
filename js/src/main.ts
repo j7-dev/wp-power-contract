@@ -125,11 +125,14 @@ declare const signature_pad_custom_data: {
 						const urlParams = new URLSearchParams(window.location.search)
 						const orderId = urlParams.get('order_id')
 						const redirect = urlParams.get('redirect')
+						const blogId = urlParams.get('blog_id')
 
 						if (orderId) {
 							formData.append('_order_id', orderId)
 						}
-
+						if (blogId) {
+							formData.append('_blog_id', blogId)
+						}
 						if (redirect) {
 							formData.append('_redirect', redirect)
 						}
@@ -144,6 +147,18 @@ declare const signature_pad_custom_data: {
 							formData.append(key, inputData[key])
 						})
 
+						// 先將可以編輯的欄位背景變透明
+						$('.can_edit').css({
+							'border-top': 'none',
+							'border-left': 'none',
+							'border-right': 'none',
+							'border-radius': '0px',
+						}).addClass('!bg-transparent')
+
+						$('.pct__signature').css('border', 'none')
+
+						$submitBtn.find('.pc-loading').show()
+
 						// 將合約主體 DOM 轉換成圖片跟著 API 送出
 						const contractMain = document.getElementById('contract-main')
 						if (!contractMain) {
@@ -151,11 +166,6 @@ declare const signature_pad_custom_data: {
 							return
 						}
 
-						// 先將可以編輯的欄位背景變透明
-						$('.can_edit').css('backgroundColor', 'transparent')
-						$('.pct__signature').css('border', 'none')
-
-						$submitBtn.find('.pc-loading').show()
 						try {
 							const dataUrl = await domtoimage.toJpeg(contractMain, {
 								quality: 1,

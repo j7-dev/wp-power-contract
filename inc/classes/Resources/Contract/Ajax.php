@@ -72,6 +72,7 @@ final class Ajax {
 		$meta_data['screenshot_url'] = $img_info['url'];
 
 		$data['meta_input'] = $meta_data;
+		// phpcs:disable
 		$default_args       = [
 			'post_type'   => Init::POST_TYPE,
 			'post_status' => 'pending',
@@ -82,7 +83,11 @@ final class Ajax {
 			$user_id ? "對應 user_id: #{$user_id}" : ''
 			),
 			'post_author' => $user_id,
-		]; // phpcs:ignore
+			'meta_input'  => [
+				'_blog_id' => $_POST['_blog_id'],// 子站 id
+			],
+		];
+		// phpcs:enable
 
 		$args = \wp_parse_args( $data, $default_args );
 
