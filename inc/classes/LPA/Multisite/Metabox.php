@@ -7,7 +7,6 @@
 
 namespace J7\PowerContract\LPA\Multisite;
 
-use J7\PowerContract\Resources\Contract\Init as Contract;
 use J7\PowerContract\Resources\ContractTemplate\Init as ContractTemplate;
 
 

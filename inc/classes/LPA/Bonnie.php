@@ -17,6 +17,7 @@ declare(strict_types=1);
 
 namespace J7\PowerContract\LPA;
 
+use J7\PowerContract\LPA\Multisite\Integration;
 use J7\PowerContract\Resources\ContractTemplate\Init;
 use J7\WpUtils\Classes\General;
 
@@ -42,6 +43,7 @@ final class Bonnie {
 	/**
 	 * 訂單完成後推播的合約模板 contract_template_id
 	 *
+	 * @deprecated 改用 get_contract_template_id
 	 * @var int
 	 */
 	private $contract_template_id = 470975;
@@ -50,6 +52,14 @@ final class Bonnie {
 	 * Constructor
 	 */
 	public function __construct() {
+
+		// TEST 測試特定 hook 記得刪除
+		\add_action(
+			'init',
+			function () {
+				// \do_action('woocommerce_order_status_completed', 455199);
+			}
+			);
 
 		// 如果沒有安裝 Oberon 的 bonnie 外掛，就 return
 		if (!class_exists('\Bonnie\Api\Bonnie_Api')) {
@@ -181,6 +191,8 @@ final class Bonnie {
 
 		// 訂金商品不需要簽約
 		if ( $include_deposit ) {
+			// TEST 印出 ErroLog 記得移除
+			\J7\WpUtils\Classes\ErrorLog::info($order_id, '訂金商品不需要簽約');
 			return;
 		}
 
@@ -195,16 +207,16 @@ final class Bonnie {
 
 		$push = new \Bonnie\Api\Bonnie_Push( $bonnie_bot_raw_id, $bot_pid );
 
-		$contract_template_id = $this->get_contract_template_id();
-		$permalink            = \get_permalink($contract_template_id);
-		$permalink            = \add_query_arg(
-			[
-				'order_id' => $order_id,
-			],
-			$permalink
-		);
+		$permalink = $this->get_contract_template_permalink($order_id);
 
-		$result = $push->add_message(
+		// TEST 印出 ErroLog 記得移除
+		\J7\WpUtils\Classes\ErrorLog::info($permalink, '$permalink');
+
+		if (!$permalink) {
+			return;
+		}
+
+		$push->add_message(
 			'已經收到您的訂單，點下方完成簽約',
 			[
 				[
@@ -213,7 +225,7 @@ final class Bonnie {
 					'value' => $permalink,
 				],
 			]
-		);
+			);
 	}
 
 
@@ -335,10 +347,62 @@ final class Bonnie {
 	/**
 	 * 取得合約模板 ID
 	 * 可能會有不同規則來顯示不同的模板
+	 * 目前規則為取得主站(blog_id:1)最新發布的合約模板
 	 *
-	 * @return int
+	 * @return int|null
 	 */
-	private function get_contract_template_id(): int {
-		return $this->contract_template_id;
+	private function get_contract_template_id(): int|null {
+		$current_blog_id = \get_current_blog_id();
+		// 從主站(blog_id:1) 取得當年子站的合約模板
+		\switch_to_blog(1);
+		$post_ids = \get_posts(
+		[
+			'post_type'      => Init::POST_TYPE,
+			'posts_per_page' => 1,
+			'orderby'        => 'date',
+			'order'          => 'DESC',
+			'fields'         => 'ids',
+			'meta_key'       => Integration::BLOG_ID_META_KEY,
+			'meta_value'     => $current_blog_id,
+		]
+		);
+
+		\restore_current_blog();
+
+		if (!$post_ids || !\is_array($post_ids)) {
+			return null;
+		}
+
+		return $post_ids[0];
+	}
+
+	/**
+	 * 取得合約模板的完整連結
+	 *
+	 * @param int $order_id 訂單 ID
+	 * @return string
+	 */
+	private function get_contract_template_permalink( $order_id ): string {
+
+		$contract_template_id = $this->get_contract_template_id();
+		// TEST 印出 ErroLog 記得移除
+		\J7\WpUtils\Classes\ErrorLog::info($contract_template_id, '$contract_template_id');
+
+		if (!$contract_template_id) {
+			return '';
+		}
+
+		\switch_to_blog(1);
+		$permalink = \get_permalink($contract_template_id);
+		\restore_current_blog();
+
+		$permalink = \add_query_arg(
+			[
+				'order_id' => $order_id,
+			],
+			$permalink
+		);
+
+		return $permalink;
 	}
 }

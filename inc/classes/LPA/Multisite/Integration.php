@@ -61,7 +61,7 @@ final class Integration {
 		foreach ($columns as $key => $value) {
 			if ($key === 'title') {
 				$new_columns[ $key ]      = $value;
-				$new_columns['blog_name'] = '部落格';
+				$new_columns['blog_name'] = '子站';
 			} else {
 				$new_columns[ $key ] = $value;
 			}
