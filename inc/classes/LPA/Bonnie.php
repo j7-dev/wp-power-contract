@@ -399,6 +399,7 @@ final class Bonnie {
 		$permalink = \add_query_arg(
 			[
 				'order_id' => $order_id,
+				'blog_id'  => \get_current_blog_id(),
 			],
 			$permalink
 		);
