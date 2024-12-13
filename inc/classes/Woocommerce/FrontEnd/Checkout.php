@@ -96,6 +96,10 @@ final class Checkout {
 			$settings_dto->chosen_contract_template
 			);
 
+		if (!$chosen_contract_template) {
+			return $url;
+		}
+
 		self::$origin_thankyou_url = $url;
 
 		// 重導向資料紀錄在 url
@@ -104,7 +108,7 @@ final class Checkout {
 					'redirect' => 'thankyou',
 					'order_id' => $order->get_id(),
 				],
-				\site_url("contract_template/{$chosen_contract_template}")
+				\get_permalink($chosen_contract_template)
 				);
 
 		// 重導向到合約頁面
