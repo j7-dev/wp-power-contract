@@ -8,7 +8,7 @@ use J7\PowerContract\Admin\SettingsDTO;
 
 
 $settings_key = Settings::SETTINGS_KEY;
-$settings_dto = SettingsDTO::get_instance();
+$settings_dto = SettingsDTO::instance();
 
 
 printf(

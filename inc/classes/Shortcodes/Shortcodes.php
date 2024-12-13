@@ -317,7 +317,7 @@ final class Shortcodes {
 	 * @return array 輸入框的參數
 	 */
 	public static function set_default_value( array $args ): array {
-		$settings_dto = SettingsDTO::get_instance();
+		$settings_dto = SettingsDTO::instance();
 		if (!$settings_dto->display_order_info) {
 			return $args;
 		}

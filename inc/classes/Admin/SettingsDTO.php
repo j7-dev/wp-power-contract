@@ -16,7 +16,12 @@ if (class_exists('J7\PowerContract\Admin\SettingsDTO')) {
  * Class SettingsDTO
  */
 final class SettingsDTO extends DTO {
-	use \J7\WpUtils\Traits\SingletonTrait;
+
+	/**
+	 * @var self
+	 * 實例
+	 */
+	private static $instance = null;
 
 	/**
 	 * @var string
@@ -67,17 +72,38 @@ final class SettingsDTO extends DTO {
 	public $emails = [ '' ];
 
 	/**
-	 * 取得已經從 wp_option 取得資料後的實例
+	 * @var string
+	 * 選擇的合約模板 id
+	 */
+	public $chosen_contract_template = '';
+
+	/**
+	 * Constructor.
+	 *
+	 * @param array<string, string> $input Input values.
+	 */
+	public function __construct( array $input = [] ) {
+		parent::__construct($input);
+		self::$instance = $this;
+	}
+
+	/**
+	 * Get the singleton instance
 	 *
 	 * @return self
 	 */
-	public static function get_instance(): self {
+	public static function instance() { // phpcs:ignore
 		$setting_array = \get_option(Settings::SETTINGS_KEY, []);
 		if (!\is_array($setting_array)) {
 			$setting_array = [];
 		}
-		return self::instance($setting_array);
+
+		if ( null === self::$instance ) {
+			new self($setting_array);
+		}
+		return self::$instance;
 	}
+
 
 	/**
 	 * 取得 input name 表單用

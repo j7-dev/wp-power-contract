@@ -23,6 +23,7 @@ printf(
 __('You can override the default settings in contract template post', 'power_contract'),
 );
 */
+
 echo '<form method="post" action="options.php">';
 \settings_fields($settings_key);
 \do_settings_sections($settings_key);

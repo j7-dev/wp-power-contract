@@ -35,7 +35,7 @@ final class Email {
 	 * @return void
 	 */
 	public static function send_email( $new_contract_id, $args ): void {
-		$setting_dto = SettingsDTO::get_instance();
+		$setting_dto = SettingsDTO::instance();
 
 		$subject  = self::get_subject( (int) $new_contract_id);
 		$post     = \get_post( $new_contract_id );
