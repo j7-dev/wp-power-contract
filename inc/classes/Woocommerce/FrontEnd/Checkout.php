@@ -33,27 +33,16 @@ final class Checkout {
 
 		\add_action('template_redirect', [ __CLASS__, 'redirect_before_checkout' ], 10 );
 		\add_filter('woocommerce_get_checkout_order_received_url', [ __CLASS__, 'redirect_before_thankyou' ], 10, 2);
+
+		\add_filter('power_contract_redirect_before_checkout_condition', [ __CLASS__, 'redirect_before_checkout_base_condition' ]);
+
+		\add_filter('power_contract_redirect_before_thankyou_condition', [ __CLASS__, 'redirect_before_thankyou_base_condition' ], 10, 2);
 	}
 
 	/**
 	 * 結帳前重導頁面
 	 */
 	public static function redirect_before_checkout(): void {
-
-		if (!\is_checkout()) {
-			return;
-		}
-
-		$is_signed = ( $_GET['is_signed'] ?? 'no' ) === 'yes';
-		if ($is_signed) {
-			return;
-		}
-
-		$settings_dto = SettingsDTO::instance();
-		if (!$settings_dto->display_contract_before_checkout) {
-			return;
-		}
-
 		$custom_condition = \apply_filters(
 			'power_contract_redirect_before_checkout_condition',
 			true
@@ -62,6 +51,7 @@ final class Checkout {
 			return;
 		}
 
+		$settings_dto             = SettingsDTO::instance();
 		$chosen_contract_template = \apply_filters(
 			'power_contract_chosen_contract_template',
 			$settings_dto->chosen_contract_template
@@ -89,23 +79,17 @@ final class Checkout {
 	 * @return string
 	 */
 	public static function redirect_before_thankyou( $url, $order ): string {
-		$settings_dto = SettingsDTO::instance();
-		if (!$settings_dto->display_contract_after_checkout) {
-			return $url;
-		}
-		$is_signed = $order->get_meta('is_signed') === 'yes';
-
-		if ($is_signed) {
-			return $url;
-		}
 
 		$custom_condition = \apply_filters(
 			'power_contract_redirect_before_thankyou_condition',
-			true
+			true,
+			$order
 			);
 		if (!$custom_condition) {
 			return $url;
 		}
+
+		$settings_dto = SettingsDTO::instance();
 
 		$chosen_contract_template = \apply_filters(
 			'power_contract_chosen_contract_template',
@@ -125,5 +109,61 @@ final class Checkout {
 
 		// 重導向到合約頁面
 		return $url;
+	}
+
+	/**
+	 * 結帳前重導頁面條件
+	 *
+	 * @param bool $custom_condition 能不能重導
+	 *
+	 * @return bool
+	 */
+	public static function redirect_before_checkout_base_condition( $custom_condition ): bool {
+
+		if (!$custom_condition) {
+			return false;
+		}
+
+		if (!\is_checkout()) {
+			return false;
+		}
+
+		$is_signed = ( $_GET['is_signed'] ?? 'no' ) === 'yes'; // phpcs:ignore
+		if ($is_signed) {
+			return false;
+		}
+
+		$settings_dto = SettingsDTO::instance();
+		if (!$settings_dto->display_contract_before_checkout) {
+			return false;
+		}
+
+		return $custom_condition;
+	}
+
+	/**
+	 * 結帳後重導頁面條件
+	 *
+	 * @param bool      $custom_condition 能不能重導
+	 * @param \WC_Order $order 訂單
+	 *
+	 * @return bool
+	 */
+	public static function redirect_before_thankyou_base_condition( $custom_condition, $order ): bool {
+		if (!$custom_condition) {
+			return false;
+		}
+
+		$settings_dto = SettingsDTO::instance();
+		if (!$settings_dto->display_contract_after_checkout) {
+			return false;
+		}
+		$is_signed = $order->get_meta('is_signed') === 'yes';
+
+		if ($is_signed) {
+			return false;
+		}
+
+		return $custom_condition;
 	}
 }
