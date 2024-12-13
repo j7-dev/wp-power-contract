@@ -28,7 +28,7 @@ final class Bootstrap {
 		Admin\Settings::instance();
 		Email\Email::instance();
 		if (class_exists('WooCommerce')) {
-			// Woocommerce\FrontEnd\Checkout::instance();
+			Woocommerce\FrontEnd\Checkout::instance();
 			Woocommerce\FrontEnd\MyAccount::instance();
 			Woocommerce\Admin\Orders::instance();
 		}
