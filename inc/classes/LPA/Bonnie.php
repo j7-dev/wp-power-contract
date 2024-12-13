@@ -66,6 +66,9 @@ final class Bonnie {
 		// 簽約完成後推播訊息給 用戶
 		\add_action('power_contract_contract_created', [ $this, 'push_bonnie_module_to_user_for_archive' ], 10, 2);
 
+		// 覆寫選擇的合約模板
+		\add_filter('power_contract_chosen_contract_template', [ __CLASS__, 'get_contract_template_id' ], 100, 1);
+
 		// 在訂單創建時保存當前子站 ID（不論是從結帳頁面還是後台創建）
 		\add_action(
 			'woocommerce_new_order',
@@ -361,7 +364,7 @@ final class Bonnie {
 	 *
 	 * @return int|null
 	 */
-	private function get_contract_template_id(): int|null {
+	public function get_contract_template_id(): int|null {
 		$current_blog_id = \get_current_blog_id();
 		// 從主站(blog_id:1) 取得當年子站的合約模板
 		\switch_to_blog(1);
