@@ -124,8 +124,14 @@ declare const signature_pad_custom_data: {
 						// 如果 url params 有帶 order_id 就 append 到 formData
 						const urlParams = new URLSearchParams(window.location.search)
 						const orderId = urlParams.get('order_id')
+						const redirect = urlParams.get('redirect')
+
 						if (orderId) {
 							formData.append('_order_id', orderId)
+						}
+
+						if (redirect) {
+							formData.append('_redirect', redirect)
 						}
 
 						formData.append(
@@ -172,11 +178,19 @@ declare const signature_pad_custom_data: {
 								$submitBtn.find('.pc-loading').hide()
 									; ($('#pct__finish-modal')[0] as HTMLDialogElement).showModal()
 
-								const isSuccess = response?.code === 'sign_success'
+								const isSuccess = response?.data?.code === 'sign_success'
+								const redirectUrl = response?.data?.redirect_url
+
 
 								if (isSuccess) {
 									$('#pct__finish-modal').find('.pc-modal-box__success').show()
 									$('#pct__finish-modal').find('.pc-modal-box__error').hide()
+
+									if (redirectUrl) {
+										setTimeout(() => {
+											window.location.href = redirectUrl
+										}, 3000);
+									}
 								} else {
 									$('#pct__finish-modal').find('.pc-modal-box__success').hide()
 									$('#pct__finish-modal').find('.pc-modal-box__error').show()

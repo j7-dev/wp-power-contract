@@ -82,7 +82,7 @@ final class Ajax {
 			$user_id ? "對應 user_id: #{$user_id}" : ''
 			),
 			'post_author' => $user_id,
-		];
+		]; // phpcs:ignore
 
 		$args = \wp_parse_args( $data, $default_args );
 
@@ -91,11 +91,51 @@ final class Ajax {
 
 		\do_action( 'power_contract_contract_created', $new_contract_id, $args );
 
+		$order_id     = ( (int) $args['meta_input']['_order_id'] ) ?? null;
+		$redirect     = $args['meta_input']['_redirect'] ?? null;
+		$redirect_url = self::get_redirect_url($order_id, $redirect);
+
 		\wp_send_json_success(
 			[
-				'code'    => 'sign_success',
-				'message' => '',
+				'code'         => 'sign_success',
+				'message'      => '',
+				'redirect_url' => $redirect_url,
 			]
 			);
+	}
+
+
+	/**
+	 * Get redirect url
+	 *
+	 * @param int|null    $order_id 訂單 ID
+	 * @param string|null $redirect redirect
+	 * @return string
+	 */
+	public static function get_redirect_url( ?int $order_id, ?string $redirect ): string {
+		$order = null;
+		if ($order_id ) {
+			$order = \wc_get_order( $order_id );
+			$order->update_meta_data( 'is_signed', 'yes' );
+			$order->save();
+		}
+
+		$redirect_url = match ( $redirect) {
+			'checkout' => \add_query_arg(
+				[
+					'is_signed' => 'yes',
+				],
+				\wc_get_checkout_url()
+				),
+			'thankyou' => $order ? \add_query_arg(
+				[
+					'is_signed' => 'yes',
+				],
+				$order->get_checkout_order_received_url()
+				) : '',
+			default => '',
+		};
+
+		return $redirect_url;
 	}
 }
