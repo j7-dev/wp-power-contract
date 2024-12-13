@@ -65,6 +65,20 @@ final class Bonnie {
 
 		// 簽約完成後推播訊息給 用戶
 		\add_action('power_contract_contract_created', [ $this, 'push_bonnie_module_to_user_for_archive' ], 10, 2);
+
+		// 在訂單創建時保存當前子站 ID（不論是從結帳頁面還是後台創建）
+		\add_action(
+			'woocommerce_new_order',
+			function ( $order_id ) {
+				$order = \wc_get_order($order_id);
+				if ($order) {
+					$order->update_meta_data('_blog_id', \get_current_blog_id());
+					$order->save();
+				}
+			},
+			10,
+			1
+			);
 	}
 
 	/** phpcs:disable
@@ -155,9 +169,17 @@ final class Bonnie {
 	 * @param int $order_id 訂單 ID
 	 */
 	public function push_bonnie_module_for_sign( $order_id ) {
+
 		$order    = \wc_get_order($order_id);
 		$customer = $order->get_user();
 		if (!$customer) {
+			return;
+		}
+
+		$order_blog_id = (int) $order->get_meta('_blog_id');
+
+		// 子站中的訂單完成時，都會循環執行，但只需要執行一次就好了
+		if ($order_blog_id !== \get_current_blog_id()) {
 			return;
 		}
 
@@ -200,9 +222,6 @@ final class Bonnie {
 		$push = new \Bonnie\Api\Bonnie_Push( $bonnie_bot_raw_id, $bot_pid );
 
 		$permalink = $this->get_contract_template_permalink($order_id);
-
-		// TEST 印出 ErroLog 記得移除
-		\J7\WpUtils\Classes\ErrorLog::info($permalink, '$permalink');
 
 		if (!$permalink) {
 			return;
@@ -326,7 +345,6 @@ final class Bonnie {
 			return;
 		}
 		?>
-
 		<style>
 			.woocommerce-contract-details div.flex{
 					border: 1px solid var(--ast-border-color);
