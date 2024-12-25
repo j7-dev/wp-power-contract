@@ -75,7 +75,7 @@ final class Bonnie {
 			function ( $order_id ) {
 				$order = \wc_get_order($order_id);
 				if ($order) {
-					$order->update_meta_data('_blog_id', \get_current_blog_id());
+					$order->update_meta_data('_blog_id', (string) \get_current_blog_id());
 					$order->save();
 				}
 			},
@@ -108,6 +108,7 @@ final class Bonnie {
 	 *  - json: array{bot_id:string, bot_raw_uid:string, bot_uid:string, bot_pid:string} 用戶 LINE 訊息 pid 是 LINE OA id, uid 是 LINE 用戶 id
 	 * phpcs:enable
 	 * @return string 按鈕的 url
+	 * @phpstan-ignore-next-line
 	 */
 	public function add_params_to_bonnie_button_url( $url, $value, $request ) {
 		// 如果 $url 不包含 /contract_template/ 就 return
@@ -115,6 +116,7 @@ final class Bonnie {
 			return $url;
 		}
 
+		// @phpstan-ignore-next-line
 		$body_params = $request->get_json_params();
 		// 用 bonnie_bot_raw_id 找 user
 		$bonnie_bot_raw_id = $body_params['bot_raw_uid'] ?? '';
@@ -170,6 +172,7 @@ final class Bonnie {
 	 * 訂單完成後，推 LINE 訊息給用戶線上簽約網址
 	 *
 	 * @param int $order_id 訂單 ID
+	 * @return void
 	 */
 	public function push_bonnie_module_for_sign( $order_id ) {
 
@@ -364,7 +367,7 @@ final class Bonnie {
 	 *
 	 * @return int|null
 	 */
-	public function get_contract_template_id(): int|null {
+	public static function get_contract_template_id(): int|null {
 		$current_blog_id = \get_current_blog_id();
 		// 從主站(blog_id:1) 取得當年子站的合約模板
 		\switch_to_blog(1);
@@ -397,7 +400,7 @@ final class Bonnie {
 	 */
 	private function get_contract_template_permalink( $order_id ): string {
 
-		$contract_template_id = $this->get_contract_template_id();
+		$contract_template_id = self::get_contract_template_id();
 		// TEST 印出 ErroLog 記得移除
 		\J7\WpUtils\Classes\ErrorLog::info($contract_template_id, '$contract_template_id');
 
