@@ -107,8 +107,8 @@ final class Integration {
 			return $args;
 		}
 
-		$order_id = (int) $_GET['order_id'] ?? null; // phpcs:ignore
-		$blog_id  = (int) $_GET['blog_id'] ?? null; // phpcs:ignore 子站 id
+		$order_id = (int) ($_GET['order_id'] ?? null); // phpcs:ignore
+		$blog_id  = (int) ($_GET['blog_id'] ?? null); // phpcs:ignore 子站 id
 		if (!$order_id || !$blog_id) {
 			return $args;
 		}
