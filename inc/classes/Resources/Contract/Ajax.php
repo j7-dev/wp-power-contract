@@ -104,7 +104,7 @@ final class Ajax {
 			[
 				'code'         => 'sign_success',
 				'message'      => '',
-				'redirect_url' => $redirect_url,
+				'redirect_url' => \apply_filters('power_contract_contract_created_redirect_url', $redirect_url, $new_contract_id, $order_id),
 			]
 			);
 	}

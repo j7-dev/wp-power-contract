@@ -87,6 +87,9 @@ final class Bonnie {
 		\remove_action( 'woocommerce_order_status_completed', 'Bonnie\Api\Bonnie_Api::send_course_permission_message', 10 );
 		\remove_action( 'woocommerce_order_status_completed', 'Bonnie\Order::order_completed', 10 );
 		\add_action( 'power_contract_contract_approved', [ __CLASS__, 'push_messages' ], 10, 3 );
+
+		// 不需要重新導向到 THANKYOU PAGE
+		\add_filter('power_contract_contract_created_redirect_url', fn() => '', 100);
 	}
 
 	/** phpcs:disable
@@ -431,6 +434,9 @@ final class Bonnie {
 		if (!$order_id) {
 			return;
 		}
+
+		// TEST 印出 ErrorLog 記得移除
+		\J7\WpUtils\Classes\ErrorLog::info($order_id, 'order_id');
 
 		// 切換到子站獲取資料
 		\switch_to_blog($blog_id);
