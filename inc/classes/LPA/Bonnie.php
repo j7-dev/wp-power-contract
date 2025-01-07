@@ -37,7 +37,7 @@ final class Bonnie {
 	 * @deprecated 使用訊息推播，不是推模組，所以目前不會用到
 	 * @var string
 	 */
-	private $bonnie_module_id = 'module-lzT2zotAta';
+	private $bonnie_module_id = 'module-lzT2zotAta'; // @phpstan-ignore-line
 
 
 	/**
@@ -183,6 +183,9 @@ final class Bonnie {
 		}
 
 		$order_blog_id = (int) $order->get_meta('_blog_id');
+
+		// TEST 印出 ErrorLog 記得移除
+		\J7\WpUtils\Classes\ErrorLog::info($order_blog_id, 'order_blog_id');
 
 		// 子站中的訂單完成時，都會循環執行，但只需要執行一次就好了
 		if ($order_blog_id !== \get_current_blog_id()) {
@@ -369,7 +372,7 @@ final class Bonnie {
 	 */
 	public static function get_contract_template_id(): int|null {
 		$current_blog_id = \get_current_blog_id();
-		// 從主站(blog_id:1) 取得當年子站的合約模板
+		// 從主站(blog_id:1) 取得當前子站的合約模板
 		\switch_to_blog(1);
 		$post_ids = \get_posts(
 		[

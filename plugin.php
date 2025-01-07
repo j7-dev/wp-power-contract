@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:       Power Contract
+ * Plugin Name:       Power Contract | 學吧版本
  * Plugin URI:        https://github.com/j7-dev/wp-power-contract
  * Description:       WordPress 線上簽合約 & 審批 外掛
  * Version:           0.0.8

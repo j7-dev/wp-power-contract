@@ -31,7 +31,7 @@ final class Integration {
 	/**
 	 * 支援的文章類型
 	 *
-	 * @var array
+	 * @var array<string>
 	 */
 	private $supported_post_types;
 
@@ -58,8 +58,8 @@ final class Integration {
 	/**
 	 * 添加部落格列到文章列表
 	 *
-	 * @param array $columns 現有的列
-	 * @return array 修改後的列
+	 * @param array<string,string> $columns 現有的列
+	 * @return array<string,string> 修改後的列
 	 */
 	public function add_blog_column( $columns ) {
 		$new_columns = [];
@@ -80,7 +80,7 @@ final class Integration {
 	 * @param string $column_name 列名
 	 * @param int    $post_id 文章 ID
 	 */
-	public function display_blog_info( $column_name, $post_id ) {
+	public function display_blog_info( $column_name, $post_id ): void {
 		if ($column_name !== 'blog_name') {
 			return;
 		}
@@ -108,7 +108,7 @@ final class Integration {
 		}
 
 		$order_id = (int) ($_GET['order_id'] ?? null); // phpcs:ignore
-		$blog_id  = (int) ($_GET['blog_id'] ?? null); // phpcs:ignore 子站 id
+		$blog_id  = (int) ( $_GET['blog_id'] ?? null ); // phpcs:ignore 子站 id
 		if (!$order_id || !$blog_id) {
 			return $args;
 		}

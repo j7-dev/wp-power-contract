@@ -19,7 +19,7 @@ final class Metabox {
 	/**
 	 * 支援的文章類型
 	 *
-	 * @var array
+	 * @var array<string>
 	 */
 	private $supported_post_types;
 
