@@ -82,6 +82,11 @@ final class Bonnie {
 			10,
 			1
 			);
+
+		// 將原本訂單完成的推播訊息移動到合約審核後推播
+		\remove_action( 'woocommerce_order_status_completed', 'Bonnie\Api\Bonnie_Api::send_course_permission_message', 10 );
+		\remove_action( 'woocommerce_order_status_completed', 'Bonnie\Order::order_completed', 10 );
+		\add_action( 'power_contract_contract_approved', [ __CLASS__, 'push_messages' ], 10, 3 );
 	}
 
 	/** phpcs:disable
@@ -255,32 +260,35 @@ final class Bonnie {
 	 *
 	 * @param int                  $contract_id 合約 ID
 	 * @param array<string, mixed> $args 合約資料
+	 * @return void
 	 */
-	public function push_bonnie_module_to_user_for_archive( $contract_id, $args ) {
+	public function push_bonnie_module_to_user_for_archive( $contract_id, $args ): void {
 
 		$author_id = \get_post_field('post_author', $contract_id);
 
 		// bonnie 上的 user id
-		$bonnie_bot_raw_id = \get_user_meta($author_id, 'bonnie_bot_raw_id', true);
+		$bonnie_bot_raw_id = \get_user_meta( (int) $author_id, 'bonnie_bot_raw_id', true);
 
 		// 合約連結的訂單 id
 		$order_id = \get_post_meta($contract_id, '_order_id', true);
 
 		$screenshot_url = \get_post_meta($contract_id, 'screenshot_url', true);
-		if (!$screenshot_url) {
-			return;
-		}
 
 		// bot_pid = LINE OA id，本地環境實為了方便測試，固定為 281jvjai
 		$bot_pid = 'local' === \wp_get_environment_type() ? '281jvjai' : \Bonnie\Api\Bonnie_Api::get_bot_pid($order_id);
 
-		$bonnie_push_instance                  = new BonniePush( $bonnie_bot_raw_id, $bot_pid );
-		$bonnie_push_instance->body['message'] = [
-			'type'     => 'image',
-			'imageUrl' => $screenshot_url,
-		];
+		if ($screenshot_url) {
+			$bonnie_push_instance                  = new BonniePush( $bonnie_bot_raw_id, $bot_pid );
+			$bonnie_push_instance->body['message'] = [
+				'type'     => 'image',
+				'imageUrl' => $screenshot_url,
+			];
+			$result                                = $bonnie_push_instance->process();
+		}
 
-		$result = $bonnie_push_instance->process();
+		$bonnie_push_instance = new BonniePush( $bonnie_bot_raw_id, $bot_pid );
+		$bonnie_push_instance->add_message( '已經收到您的合約合約簽屬，等待審閱！' );
+		$bonnie_push_instance->add_message( '審閱完成後會立即通知您，並未您開通課程' );
 	}
 
 	/**
@@ -393,6 +401,42 @@ final class Bonnie {
 		}
 
 		return $post_ids[0];
+	}
+
+
+	/**
+	 * 合約審核後推播課程開通訊息
+	 * 原本是 [訂單完成時] 改為 [合約審核完成時]
+	 *
+	 * @param string   $new_status 新狀態
+	 * @param string   $old_status 舊狀態
+	 * @param \WP_Post $post 合約文章物件
+	 * @return void
+	 */
+	public static function push_messages( $new_status, $old_status, $post ): void {
+		if (!class_exists('\Bonnie\Api\Bonnie_Api')) {
+			$log = new \WC_Logger();
+			$log->info(
+				'Bonnie_Api 外掛不存在, \Bonnie\Api\Bonnie_Api class not found',
+				[
+					'source' => 'power-contract',
+				]
+				);
+			return;
+		}
+
+		$blog_id  = \get_post_meta($post->ID, '_blog_id', true) ?: \get_current_blog_id();
+		$order_id = \get_post_meta($post->ID, '_order_id', true);
+
+		if (!$order_id) {
+			return;
+		}
+
+		// 切換到子站獲取資料
+		\switch_to_blog($blog_id);
+		\call_user_func( [ '\Bonnie\Api\Bonnie_Api', 'send_course_permission_message' ], $order_id );
+		\call_user_func( [ '\Bonnie\Order', 'order_completed' ], $order_id );
+		\restore_current_blog();
 	}
 
 	/**
