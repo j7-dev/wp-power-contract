@@ -60,11 +60,21 @@ $ajax_signed_btn_link = $settings_dto->ajax_signed_btn_link ?? '';
 
 				<?php if ( $ajax_signed_btn_text ) : ?>
 				<div class="pc-modal-action">
-					<a href="<?php echo esc_url( $ajax_signed_btn_link ); ?>" class="pc-btn pc-btn-primary text-white"><?php echo esc_html( $ajax_signed_btn_text ); ?></a>
+					<a id="pc-modal-action__btn" href="<?php echo esc_url( $ajax_signed_btn_link ); ?>" class="pc-btn pc-btn-primary text-white"><?php echo esc_html( $ajax_signed_btn_text ); ?></a>
 					</div>
 				<?php endif; ?>
 			</div>
 		</dialog>
+
+		<script type="module" async>
+				const btn = document.getElementById('pc-modal-action__btn');
+				btn.addEventListener('click', closeWindow);
+
+				function closeWindow() {
+					window.close();
+        }
+
+		</script>
 
 		<?php wp_footer(); ?>
 	</body>
