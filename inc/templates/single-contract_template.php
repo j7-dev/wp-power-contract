@@ -8,8 +8,8 @@ $contract_template_id = $post->ID;
 $settings_dto = SettingsDTO::instance();
 $ajax_signed_title = $settings_dto->ajax_signed_title ?? '已經收到您的合約合約簽屬';
 $ajax_signed_description = $settings_dto->ajax_signed_description ?? '合約審閱需要3~5天，請耐心等候';
-$ajax_signed_btn_text = $settings_dto->ajax_signed_btn_text ?? '';
-$ajax_signed_btn_link = $settings_dto->ajax_signed_btn_link ?? '';
+$ajax_signed_btn_text = \apply_filters('power_contract_signed_btn_text', $settings_dto->ajax_signed_btn_text ?? '');
+$ajax_signed_btn_link = \apply_filters('power_contract_signed_btn_link', $settings_dto->ajax_signed_btn_link ?? '');
 
 ?>
 
@@ -17,6 +17,18 @@ $ajax_signed_btn_link = $settings_dto->ajax_signed_btn_link ?? '';
 <html <?php language_attributes(); ?>>
 
 	<head>
+		<script type="module">
+			// 如果用戶使用 LINE 瀏覽器，則強制用外部瀏覽器(ex: ios safari)開啟
+			if (navigator.userAgent.indexOf("Line") > -1) {
+				// 取得當前 URL
+				const currentUrl = new URL(window.location.href);
+				// 添加參數
+				currentUrl.searchParams.set('openExternalBrowser', '1');
+				// 重新導向 (會重新加載頁面)
+				window.location.href = currentUrl.toString();
+			}
+		</script>
+
 		<meta charset="<?php bloginfo( 'charset' ); ?>">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link rel="profile" href="https://gmpg.org/xfn/11">
@@ -60,22 +72,11 @@ $ajax_signed_btn_link = $settings_dto->ajax_signed_btn_link ?? '';
 
 				<?php if ( $ajax_signed_btn_text ) : ?>
 				<div class="pc-modal-action">
-					<a id="pc-modal-action__btn" href="<?php echo esc_url( $ajax_signed_btn_link ); ?>" class="pc-btn pc-btn-primary text-white"><?php echo esc_html( $ajax_signed_btn_text ); ?></a>
+					<a id="pc-modal-action__btn" href="<?php echo esc_url( $ajax_signed_btn_link ); ?>" class="pc-btn pc-btn-primary !text-white"><?php echo esc_html( $ajax_signed_btn_text ); ?></a>
 					</div>
 				<?php endif; ?>
 			</div>
 		</dialog>
-
-		<script type="module" async>
-				const btn = document.getElementById('pc-modal-action__btn');
-				btn.addEventListener('click', closeWindow);
-
-				function closeWindow() {
-					window.close();
-        }
-
-		</script>
-
 		<?php wp_footer(); ?>
 	</body>
 

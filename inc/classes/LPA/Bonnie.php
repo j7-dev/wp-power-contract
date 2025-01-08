@@ -90,6 +90,10 @@ final class Bonnie {
 
 		// 不需要重新導向到 THANKYOU PAGE
 		\add_filter('power_contract_contract_created_redirect_url', fn() => '', 100);
+
+		// 覆寫簽約後的 modal 動作按鈕
+		\add_filter('power_contract_signed_btn_text', fn() => '完成，回 LINE', 100);
+		\add_filter('power_contract_signed_btn_link', [ __CLASS__, 'override_signed_btn_link' ], 100);
 	}
 
 	/** phpcs:disable
@@ -435,14 +439,49 @@ final class Bonnie {
 			return;
 		}
 
-		// TEST 印出 ErrorLog 記得移除
-		\J7\WpUtils\Classes\ErrorLog::info($order_id, 'order_id');
-
 		// 切換到子站獲取資料
 		\switch_to_blog($blog_id);
 		\call_user_func( [ '\Bonnie\Api\Bonnie_Api', 'send_course_permission_message' ], $order_id );
 		\call_user_func( [ '\Bonnie\Order', 'order_completed' ], $order_id );
 		\restore_current_blog();
+	}
+
+	/**
+	 * 覆寫簽約後的 modal 動作按鈕
+	 *
+	 * @param string $link 原本的按鈕連結
+	 * @return string 覆寫後的按鈕連結
+	 */
+	public static function override_signed_btn_link( $link ): string {
+		$order_id = (int) ( $_GET['order_id'] ?? 0 );
+		if (!$order_id) {
+			return $link;
+		}
+		$order = \wc_get_order($order_id);
+		if (!( $order instanceof \WC_Order )) {
+			return $link;
+		}
+
+		/** @var \WC_Order_Item_Product[] $items */
+		$items = $order->get_items();
+		if (empty($items)) {
+			return $link;
+		}
+
+		$product_id = reset($items)->get_product_id();
+		$product    = \wc_get_product($product_id);
+		if (!( $product instanceof \WC_Product )) {
+			return $link;
+		}
+
+		// 取得 LINE 官方帳號代稱 LINE OA id (填寫在商品頁)
+		$bot_pid = $product->get_meta('bot_pid');
+
+		if (!$bot_pid) {
+			return $link;
+		}
+
+		return "https://line.me/R/ti/p/@{$bot_pid}";
 	}
 
 	/**
