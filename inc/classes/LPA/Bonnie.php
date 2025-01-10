@@ -274,7 +274,7 @@ final class Bonnie {
 		$author_id = \get_post_field('post_author', $contract_id);
 
 		// bonnie 上的 user id
-		$bonnie_bot_raw_id = \get_user_meta( (int) $author_id, 'bonnie_bot_raw_id', true);
+		$bot_raw_uid = \get_user_meta( (int) $author_id, 'bonnie_bot_raw_id', true);
 
 		// 合約連結的訂單 id
 		$order_id = \get_post_meta($contract_id, '_order_id', true);
@@ -285,7 +285,7 @@ final class Bonnie {
 		$bot_pid = 'local' === \wp_get_environment_type() ? '281jvjai' : \Bonnie\Api\Bonnie_Api::get_bot_pid($order_id);
 
 		if ($screenshot_url) {
-			$bonnie_push_instance                  = new BonniePush( $bonnie_bot_raw_id, $bot_pid );
+			$bonnie_push_instance                  = new BonniePush( $bot_raw_uid, $bot_pid );
 			$bonnie_push_instance->body['message'] = [
 				'type'     => 'image',
 				'imageUrl' => $screenshot_url,
@@ -293,7 +293,7 @@ final class Bonnie {
 			$result                                = $bonnie_push_instance->process();
 		}
 
-		$bonnie_push_instance = new BonniePush( $bonnie_bot_raw_id, $bot_pid );
+		$bonnie_push_instance = new BonniePush( $bot_raw_uid, $bot_pid );
 		$bonnie_push_instance->add_message( '已經收到您的合約合約簽屬，等待審閱！' );
 		$bonnie_push_instance->add_message( '審閱完成後會立即通知您，並未您開通課程' );
 	}
@@ -468,8 +468,10 @@ final class Bonnie {
 			return $link;
 		}
 
+		// 變化類型會取到父商品
 		$product_id = reset($items)->get_product_id();
-		$product    = \wc_get_product($product_id);
+
+		$product = \wc_get_product($product_id);
 		if (!( $product instanceof \WC_Product )) {
 			return $link;
 		}
@@ -504,10 +506,16 @@ final class Bonnie {
 		$permalink = \get_permalink($contract_template_id);
 		\restore_current_blog();
 
+		$order     = \wc_get_order($order_id);
+		$author_id = $order->get_customer_id();
+		// bonnie 上的 user id
+		$bot_raw_id = \get_user_meta($author_id, 'bonnie_bot_raw_id', true);
+
 		$permalink = \add_query_arg(
 			[
-				'order_id' => $order_id,
-				'blog_id'  => \get_current_blog_id(),
+				'order_id'   => $order_id,
+				'blog_id'    => \get_current_blog_id(),
+				'bot_raw_id' => $bot_raw_id,
 			],
 			$permalink
 		);

@@ -57,7 +57,7 @@ final class Ajax {
 			);
 		}
 
-		$user_id   = \get_current_user_id();
+		$user_id   = self::get_user_id_by_bot_raw_id();
 		$user_name = $post_data['user_name'] ?? '未填寫姓名';
 
 		$img_info = WP::upload_single_base64_image( $post_data['screenshot'], 'contract', true );
@@ -141,5 +141,25 @@ final class Ajax {
 		};
 
 		return $redirect_url;
+	}
+
+
+	/**
+	 * Get user id by bot raw id
+	 *
+	 * @return int
+	 */
+	public static function get_user_id_by_bot_raw_id(): int {
+		$bot_raw_id = $_POST['_bot_raw_id'] ?? ''; // phpcs:ignore
+
+		if ( empty( $bot_raw_id ) ) {
+			return 0;
+		}
+
+		global $wpdb;
+		$table_name = $wpdb->usermeta;
+		$user_id    = $wpdb->get_var( $wpdb->prepare( "SELECT user_id FROM $table_name WHERE meta_key = 'bonnie_bot_raw_id' AND meta_value = %s ORDER BY user_id DESC LIMIT 1", $bot_raw_id ) ); // phpcs:ignore
+
+		return (int) $user_id;
 	}
 }
