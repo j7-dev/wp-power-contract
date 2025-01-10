@@ -196,8 +196,17 @@ final class Bonnie {
 
 		$order_blog_id = (int) $order->get_meta('_blog_id');
 
-		// TEST 印出 ErrorLog 記得移除
-		\J7\WpUtils\Classes\ErrorLog::info($order_blog_id, 'order_blog_id');
+		$log = new \WC_Logger();
+		$log->info(
+			print_r(
+			[
+				'order_id'      => $order_id,
+				'order_blog_id' => $order_blog_id,
+			],
+			true
+			),
+		[ 'source' => 'power-contract' ]
+			);
 
 		// 子站中的訂單完成時，都會循環執行，但只需要執行一次就好了
 		if ($order_blog_id !== \get_current_blog_id()) {
@@ -226,8 +235,18 @@ final class Bonnie {
 
 		// 訂金商品不需要簽約
 		if ( $include_deposit ) {
-			// TEST 印出 ErroLog 記得移除
-			\J7\WpUtils\Classes\ErrorLog::info($order_id, '訂金商品不需要簽約');
+			$log = new \WC_Logger();
+			$log->info(
+				print_r(
+				[
+					'order_id'        => $order_id,
+					'include_deposit' => $include_deposit,
+					'message'         => '訂金商品不需要簽約',
+				],
+				true
+				),
+			[ 'source' => 'power-contract' ]
+				);
 			return;
 		}
 
@@ -294,8 +313,7 @@ final class Bonnie {
 		}
 
 		$bonnie_push_instance = new BonniePush( $bot_raw_uid, $bot_pid );
-		$bonnie_push_instance->add_message( '已經收到您的合約合約簽屬，等待審閱！' );
-		$bonnie_push_instance->add_message( '審閱完成後會立即通知您，並未您開通課程' );
+		$bonnie_push_instance->add_message( '已收到您的簽屬，請稍待專員審閱，完成後會立即通知您，就可以觀看課程了' );
 	}
 
 	/**
@@ -495,8 +513,18 @@ final class Bonnie {
 	private function get_contract_template_permalink( $order_id ): string {
 
 		$contract_template_id = self::get_contract_template_id();
-		// TEST 印出 ErroLog 記得移除
-		\J7\WpUtils\Classes\ErrorLog::info($contract_template_id, '$contract_template_id');
+
+		$log = new \WC_Logger();
+		$log->info(
+			print_r(
+			[
+				'order_id'             => $order_id,
+				'contract_template_id' => $contract_template_id,
+			],
+			true
+			),
+		[ 'source' => 'power-contract' ]
+			);
 
 		if (!$contract_template_id) {
 			return '';
