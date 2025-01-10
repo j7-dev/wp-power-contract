@@ -37,7 +37,7 @@ $ajax_signed_btn_link = \apply_filters('power_contract_signed_btn_link', $settin
 
 	<body <?php body_class(); ?> style="background-color:#fff;">
 
-		<main id="contract-main" class="px-8 pb-32">
+		<main id="contract-main" class="px-8 pt-16 pb-32">
 			<div class="w-full max-w-[1200px] mx-auto">
 				<?php \the_content(); ?>
 			</div>
