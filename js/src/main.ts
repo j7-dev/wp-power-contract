@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import jQuery, { JQuery } from 'jquery'
 import SignaturePad from 'signature_pad'
-import domtoimage from 'dom-to-image'
+import html2canvas from 'html2canvas-pro'
 import '@/assets/scss/index.scss'
 
 declare const signature_pad_custom_data: {
@@ -89,8 +89,10 @@ declare const signature_pad_custom_data: {
 					$submitBtn.on('click', async function () {
 						const isValid = validFields()
 
+						$submitBtn.find('.pc-loading').show()
 						if (!isValid) {
 							$('#pct__fields-validate__warning').show()
+							$submitBtn.find('.pc-loading').hide()
 							return
 						}
 
@@ -111,6 +113,7 @@ declare const signature_pad_custom_data: {
 							}, {})
 
 						if (!nonce || !ajaxUrl || !contract_template_id) {
+							$submitBtn.find('.pc-loading').hide()
 							console.error('nonce, ajaxUrl, contract_template_id is required')
 							alert('缺少必要參數')
 							return
@@ -129,7 +132,6 @@ declare const signature_pad_custom_data: {
 						if (orderId) {
 							formData.append('_order_id', orderId)
 						}
-
 						if (redirect) {
 							formData.append('_redirect', redirect)
 						}
@@ -144,6 +146,18 @@ declare const signature_pad_custom_data: {
 							formData.append(key, inputData[key])
 						})
 
+						// 先將可以編輯的欄位背景變透明
+						$('.can_edit')
+							.css({
+								'border-top': 'none',
+								'border-left': 'none',
+								'border-right': 'none',
+								'border-radius': '0px',
+							})
+							.addClass('!bg-transparent')
+
+						$('.pct__signature').css('border', 'none')
+
 						// 將合約主體 DOM 轉換成圖片跟著 API 送出
 						const contractMain = document.getElementById('contract-main')
 						if (!contractMain) {
@@ -151,19 +165,19 @@ declare const signature_pad_custom_data: {
 							return
 						}
 
-						// 先將可以編輯的欄位背景變透明
-						$('.can_edit').css('backgroundColor', 'transparent')
-						$('.pct__signature').css('border', 'none')
-
-						$submitBtn.find('.pc-loading').show()
 						try {
-							const dataUrl = await domtoimage.toJpeg(contractMain, {
-								quality: 1,
-								bgcolor: '#fff',
+							const canvas = await html2canvas(contractMain, {
+								allowTaint: true,
+								useCORS: true,
+								logging: false,
+								scrollX: 0,
+								scrollY: 0,
 							})
+							const dataUrl = canvas.toDataURL('image/png')
 							formData.append('screenshot', dataUrl)
 						} catch (error) {
 							console.error('error', error)
+
 							// return
 						}
 
@@ -181,7 +195,6 @@ declare const signature_pad_custom_data: {
 								const isSuccess = response?.data?.code === 'sign_success'
 								const redirectUrl = response?.data?.redirect_url
 
-
 								if (isSuccess) {
 									$('#pct__finish-modal').find('.pc-modal-box__success').show()
 									$('#pct__finish-modal').find('.pc-modal-box__error').hide()
@@ -189,7 +202,7 @@ declare const signature_pad_custom_data: {
 									if (redirectUrl) {
 										setTimeout(() => {
 											window.location.href = redirectUrl
-										}, 3000);
+										}, 3000)
 									}
 								} else {
 									$('#pct__finish-modal').find('.pc-modal-box__success').hide()
