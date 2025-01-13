@@ -173,6 +173,9 @@ declare const signature_pad_custom_data: {
 							return
 						}
 
+						// 等待一秒後再執行 html2canvas
+						await new Promise(resolve => setTimeout(resolve, 1000));
+
 						try {
 							const canvas = await html2canvas(contractMain, {
 								allowTaint: true,
