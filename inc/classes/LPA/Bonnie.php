@@ -87,6 +87,8 @@ final class Bonnie {
 		// 將原本訂單完成的推播訊息移動到合約審核後推播
 		\remove_action( 'woocommerce_order_status_completed', 'Bonnie\Api\Bonnie_Api::send_course_permission_message', 10 );
 		\remove_action( 'woocommerce_order_status_completed', 'Bonnie\Order::order_completed', 10 );
+		// 先移除，再重新添加，加入判斷條件
+		\add_action( 'woocommerce_order_status_completed', [ __CLASS__, 'maybe_send_messages' ], 20, 1 );
 		\add_action( 'power_contract_contract_approved', [ __CLASS__, 'push_messages' ], 10, 3 );
 
 		// 不需要重新導向到 THANKYOU PAGE
@@ -95,6 +97,27 @@ final class Bonnie {
 		// 覆寫簽約後的 modal 動作按鈕
 		\add_filter('power_contract_signed_btn_text', fn() => '完成，回 LINE', 100);
 		\add_filter('power_contract_signed_btn_link', [ __CLASS__, 'override_signed_btn_link' ], 100);
+	}
+
+	/**
+	 * 先移除原本的發送訊息 callback
+	 * 再重新添加，加入判斷條件
+	 *
+	 * @param int $order_id 訂單 ID
+	 * @return void
+	 */
+	public static function maybe_send_messages( $order_id ) {
+		$order                         = \wc_get_order($order_id);
+		$include_need_contract_product = Utils::include_need_contract_product( $order );
+
+		// 如果包含簽約商品，就退出，什麼也不做，改為合約審核後推播
+		if ($include_need_contract_product) {
+			return;
+		}
+
+		// 如果不包含簽約商品，就推播訊息
+		\call_user_func( [ '\Bonnie\Api\Bonnie_Api', 'send_course_permission_message' ], $order_id );
+		\call_user_func( [ '\Bonnie\Order', 'order_completed' ], $order_id );
 	}
 
 	/** phpcs:disable
@@ -434,9 +457,10 @@ final class Bonnie {
 	 */
 	public static function push_messages( $new_status, $old_status, $post ): void {
 		if (!class_exists('\Bonnie\Api\Bonnie_Api')) {
-			$log = new \WC_Logger();
-			$log->info(
+			\J7\WpUtils\Classes\WC::log(
+				'',
 				'Bonnie_Api 外掛不存在, \Bonnie\Api\Bonnie_Api class not found',
+				'info',
 				[
 					'source' => 'power-contract',
 				]
