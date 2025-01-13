@@ -20,6 +20,7 @@ namespace J7\PowerContract\LPA;
 use J7\PowerContract\LPA\Multisite\Integration;
 use J7\PowerContract\Resources\ContractTemplate\Init;
 use J7\WpUtils\Classes\General;
+use J7\PowerContract\LPA\Order\Utils;
 
 if (class_exists('J7\PowerContract\LPA\Bonnie')) {
 	return;
@@ -196,56 +197,49 @@ final class Bonnie {
 
 		$order_blog_id = (int) $order->get_meta('_blog_id');
 
-		$log = new \WC_Logger();
-		$log->info(
-			print_r(
-			[
-				'order_id'      => $order_id,
-				'order_blog_id' => $order_blog_id,
-			],
-			true
-			),
-		[ 'source' => 'power-contract' ]
-			);
+		\J7\WpUtils\Classes\WC::log(
+				'',
+				'push_bonnie_module_for_sign',
+				'info',
+				[
+					'source'        => 'power-contract',
+					'order_id'      => $order_id,
+					'order_blog_id' => $order_blog_id,
+				]
+				);
 
 		// 子站中的訂單完成時，都會循環執行，但只需要執行一次就好了
 		if ($order_blog_id !== \get_current_blog_id()) {
 			return;
 		}
 
-		$items           = $order->get_items();
-		$include_deposit = false;
-		foreach ($items as $item) {
-			/** @var \WC_Order_Item_Product $item */
-			$product_id = $item->get_product_id();
-			// 判斷是否為訂金商品(包含訂金分類)
-			$product_cats = \get_the_terms( $product_id, 'product_cat' );
-			foreach ( $product_cats as $product_cat ) {
-				if ( 'deposit' === $product_cat->slug ) {
-					$include_deposit = true;
-					break;
-				}
-			}
-
-			// 只要有訂金商品，就中斷
-			if ($include_deposit) {
-				break;
-			}
+		// 如果沒有簽約商品也不用簽約
+		$include_need_contract_product = Utils::include_need_contract_product( $order );
+		if (!$include_need_contract_product) {
+			\J7\WpUtils\Classes\WC::log(
+				'',
+				'訂單內沒有簽約商品，不需要簽約',
+				'info',
+				[
+					'source'   => 'power-contract',
+					'order_id' => $order_id,
+				]
+				);
+			return;
 		}
 
 		// 訂金商品不需要簽約
+		$include_deposit = Utils::include_deposit( $order );
 		if ( $include_deposit ) {
-			$log = new \WC_Logger();
-			$log->info(
-				print_r(
+			\J7\WpUtils\Classes\WC::log(
+				'',
+				'訂金商品不需要簽約',
+				'info',
 				[
+					'source'          => 'power-contract',
 					'order_id'        => $order_id,
 					'include_deposit' => $include_deposit,
-					'message'         => '訂金商品不需要簽約',
-				],
-				true
-				),
-			[ 'source' => 'power-contract' ]
+				]
 				);
 			return;
 		}

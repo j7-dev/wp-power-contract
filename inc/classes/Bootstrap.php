@@ -34,6 +34,7 @@ final class Bootstrap {
 			Woocommerce\FrontEnd\Checkout::instance();
 			Woocommerce\FrontEnd\MyAccount::instance();
 			Woocommerce\Admin\Orders::instance();
+			LPA\Product\Edit::instance();
 		}
 		\add_action( 'init', [ __CLASS__, 'register_assets' ], 99 );
 		\add_action( 'admin_enqueue_scripts', [ __CLASS__, 'admin_enqueue_script_list_view' ], 99 );
