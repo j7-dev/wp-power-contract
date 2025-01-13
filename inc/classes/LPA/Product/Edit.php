@@ -34,12 +34,19 @@ final class Edit {
 	 */
 	public function add_contract_product_option( array $options ): array {
 
+		$post_id = $_GET['post'] ?? null; // phpcs:ignore
+		if (!$post_id) {
+			return $options;
+		}
+
+		$need_contract = \get_post_meta($post_id, '_need_contract', true) === 'yes';
+
 		$options[ self::NEED_CONTRACT_META_KEY ] = [
 			'id'            => self::NEED_CONTRACT_META_KEY,
 			'wrapper_class' => 'show_if_simple show_if_variable',
 			'label'         => __('需要簽約', 'power-contract'),
 			'description'   => __('啟用此選項表示此產品需要簽約', 'power-contract'),
-			'default'       => 'no',
+			'default'       => $need_contract ? 'yes' : 'no',
 		];
 
 		return $options;
