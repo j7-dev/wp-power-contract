@@ -24,7 +24,7 @@ final class Checkout {
 	 *
 	 * @var string
 	 */
-	private static $origin_thankyou_url;
+	private static $origin_thankyou_url; // @phpstan-ignore-line
 
 	/**
 	 * Constructor
@@ -57,13 +57,18 @@ final class Checkout {
 			$settings_dto->chosen_contract_template
 			);
 
+		$blog_id = \get_current_blog_id();
+		\switch_to_blog(1);
 		// 重導向資料紀錄在 url
 		$url = \add_query_arg(
 				[
 					'redirect' => 'checkout',
+					'blog_id'  => $blog_id,
 				],
 				\site_url("contract_template/{$chosen_contract_template}")
 				);
+
+		\restore_current_blog();
 
 		// 重導向到合約頁面
 		\wp_safe_redirect($url);
@@ -85,6 +90,7 @@ final class Checkout {
 			true,
 			$order
 			);
+
 		if (!$custom_condition) {
 			return $url;
 		}
@@ -101,15 +107,21 @@ final class Checkout {
 		}
 
 		self::$origin_thankyou_url = $url;
+		$order_id                  = $order->get_id();
+		$blog_id                   = \get_current_blog_id();
 
+		\switch_to_blog(1);
 		// 重導向資料紀錄在 url
 		$url = \add_query_arg(
 				[
 					'redirect' => 'thankyou',
-					'order_id' => $order->get_id(),
+					'order_id' => $order_id,
+					'blog_id'  => $blog_id,
 				],
 				\get_permalink($chosen_contract_template)
 				);
+
+		\restore_current_blog();
 
 		// 重導向到合約頁面
 		return $url;

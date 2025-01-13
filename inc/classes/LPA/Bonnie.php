@@ -402,7 +402,7 @@ final class Bonnie {
 		// 從主站(blog_id:1) 取得當前子站的合約模板
 		\switch_to_blog(1);
 		$post_ids = \get_posts(
-		[
+		[ // @phpstan-ignore-line
 			'post_type'      => Init::POST_TYPE,
 			'posts_per_page' => 1,
 			'orderby'        => 'date',
@@ -465,18 +465,23 @@ final class Bonnie {
 	 * @return string 覆寫後的按鈕連結
 	 */
 	public static function override_signed_btn_link( $link ): string {
-		$order_id = (int) ( $_GET['order_id'] ?? 0 );
+		$order_id = (int) ( $_GET['order_id'] ?? 0 ); // phpcs:ignore
+		$blog_id  = (int) ( $_GET['blog_id'] ?? \get_current_blog_id() ); // phpcs:ignore
 		if (!$order_id) {
 			return $link;
 		}
+
+		\switch_to_blog($blog_id);
 		$order = \wc_get_order($order_id);
 		if (!( $order instanceof \WC_Order )) {
+			\restore_current_blog();
 			return $link;
 		}
 
 		/** @var \WC_Order_Item_Product[] $items */
 		$items = $order->get_items();
 		if (empty($items)) {
+			\restore_current_blog();
 			return $link;
 		}
 
@@ -485,6 +490,7 @@ final class Bonnie {
 
 		$product = \wc_get_product($product_id);
 		if (!( $product instanceof \WC_Product )) {
+			\restore_current_blog();
 			return $link;
 		}
 
@@ -492,9 +498,11 @@ final class Bonnie {
 		$bot_pid = $product->get_meta('bot_pid');
 
 		if (!$bot_pid) {
+			\restore_current_blog();
 			return $link;
 		}
 
+		\restore_current_blog();
 		return "https://line.me/R/ti/p/@{$bot_pid}";
 	}
 
