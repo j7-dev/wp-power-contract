@@ -31,6 +31,7 @@ final class Shortcodes {
 		'pct_signature',
 		'pct_date',
 		'pct_ip',
+		'pct_product_names',
 	];
 
 
@@ -90,6 +91,11 @@ final class Shortcodes {
 			'label'       => 'IP',
 			'description' => '顯示用戶的 IP',
 		],
+		'pct_product_names' => [
+			'shortcode'   => '[pct_product_names]',
+			'label'       => '產品名稱',
+			'description' => '顯示訂單中所有產品名稱',
+		],
 	];
 
 	/**
@@ -108,7 +114,7 @@ final class Shortcodes {
 	 * 短碼 pct_input callback
 	 * 輸入框
 	 *
-	 * @param array $params 短碼參數
+	 * @param array{name: string, width: string, placeholder: string, class: string, id: string, type: string, value: string} $params 短碼參數
 	 * @return string
 	 */
 	public static function pct_input_callback( array $params ): string {
@@ -160,7 +166,7 @@ final class Shortcodes {
 	/**
 	 * 顯示公司章 (featured image)
 	 *
-	 * @param array $params 短碼參數
+	 * @param array{style: string, class: string, id: string} $params 短碼參數
 	 * @return string
 	 */
 	public static function pct_seal_callback( array $params ): string {
@@ -211,7 +217,7 @@ final class Shortcodes {
 	/**
 	 * 簽名板
 	 *
-	 * @param array $params 短碼參數
+	 * @param array{style: string, class: string, id: string} $params 短碼參數
 	 * @return string
 	 */
 	public static function pct_signature_callback( array $params ): string {
@@ -270,10 +276,10 @@ final class Shortcodes {
 	/**
 	 * 顯示日期
 	 *
-	 * @param array|null $atts 短碼參數
+	 * @param array{format: string, base: string} $params 短碼參數
 	 * @return string
 	 */
-	public static function pct_date_callback( ?array $atts ): string {
+	public static function pct_date_callback( array $params ): string {
 		$default_atts = [
 			'format' => '中華民國 Y 年 m 月 d 日',
 			'base'   => 'tw', // tw | ad 中華民國 | 西元
@@ -300,21 +306,70 @@ final class Shortcodes {
 	/**
 	 * 顯示 IP
 	 *
-	 * @param array|null $atts 短碼參數
 	 * @return string
 	 */
-	public static function pct_ip_callback( ?array $atts ): string {
+	public static function pct_ip_callback(): string {
 		return General::get_client_ip();
 	}
 
+	/**
+	 * 顯示訂單中所有產品名稱
+	 *
+	 * @return string
+	 */
+	public static function pct_product_names_callback(): string {
+		$order_id = $_GET['order_id'] ?? null; // phpcs:ignore
+		if (!$order_id) {
+			return '《找不到訂單 ID》';
+		}
 
+		$order = \wc_get_order($order_id);
+		if (!$order) {
+			return '《找不到訂單》';
+		}
+
+		$product_names = $order->get_items();
+		$product_names = array_map(
+			fn ( $item ) => self::format_product_names($item->get_name()),
+			$product_names
+		);
+
+		return implode(', ', $product_names);
+	}
+
+
+	/**
+	 * 格式化產品名稱
+	 *
+	 * @param string $product_name 產品名稱
+	 * @return string
+	 */
+	public static function format_product_names( string $product_name ): string {
+		$key_words = [
+			'數位教材',
+			'有聲書',
+		];
+
+		// 產品名稱可能會叫做  "OOO數位教材 (分期付款)"  "OOO有聲書 (一次付款)(經濟)" 等等...我希望可以將  "數位教材"、"有聲書" 後面的文字都去除
+		foreach ($key_words as $key_word) {
+			if (strpos($product_name, $key_word) !== false) {
+				// 找到關鍵字的位置
+				$pos = strpos($product_name, $key_word);
+				// 截取從開頭到關鍵字結尾的部分
+				$product_name = substr($product_name, 0, $pos + strlen($key_word));
+				break;
+			}
+		}
+
+		return "「{$product_name}」";
+	}
 
 
 	/**
 	 * 設定預設值
 	 *
-	 * @param array $args 輸入框的參數
-	 * @return array 輸入框的參數
+	 * @param array{name: string, width: string, placeholder: string, class: string, id: string, type: string, value: string} $args 輸入框的參數
+	 * @return array{name: string, width: string, placeholder: string, class: string, id: string, type: string, value: string} 輸入框的參數
 	 */
 	public static function set_default_value( array $args ): array {
 		$settings_dto = SettingsDTO::instance();
