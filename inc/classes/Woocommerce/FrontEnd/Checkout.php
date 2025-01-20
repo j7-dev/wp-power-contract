@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace J7\PowerContract\Woocommerce\FrontEnd;
 
 use J7\PowerContract\Admin\SettingsDTO;
+use J7\PowerContract\LPA\Order\Utils;
 
 if (class_exists('J7\PowerContract\Woocommerce\FrontEnd\Checkout')) {
 	return;
@@ -84,6 +85,21 @@ final class Checkout {
 	 * @return string
 	 */
 	public static function redirect_before_thankyou( $url, $order ): string {
+
+		// 如果沒有簽約商品也不用簽約
+		$include_need_contract_product = Utils::include_need_contract_product( $order );
+		if (!$include_need_contract_product) {
+			\J7\WpUtils\Classes\WC::log(
+				'',
+				'訂單內沒有簽約商品，不需要簽約',
+				'info',
+				[
+					'source'   => 'power-contract',
+					'order_id' => $order->get_id(),
+				]
+				);
+			return $url;
+		}
 
 		$custom_condition = \apply_filters(
 			'power_contract_redirect_before_thankyou_condition',
