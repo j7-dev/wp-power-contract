@@ -112,6 +112,15 @@ final class Bonnie {
 
 		// 如果包含簽約商品，就退出，什麼也不做，改為合約審核後推播
 		if ($include_need_contract_product) {
+			\J7\WpUtils\Classes\WC::log(
+				'',
+				'maybe_send_messages 什麼也不做，改為合約審核後推播',
+				'info',
+				[
+					'source'   => 'power-contract',
+					'order_id' => $order_id,
+				]
+				);
 			return;
 		}
 
@@ -241,7 +250,7 @@ final class Bonnie {
 		if (!$include_need_contract_product) {
 			\J7\WpUtils\Classes\WC::log(
 				'',
-				'訂單內沒有簽約商品，不需要簽約',
+				'push_bonnie_module_for_sign 訂單內沒有簽約商品，不需要簽約',
 				'info',
 				[
 					'source'   => 'power-contract',

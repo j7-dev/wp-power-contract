@@ -91,11 +91,14 @@ final class Checkout {
 		if (!$include_need_contract_product) {
 			\J7\WpUtils\Classes\WC::log(
 				'',
-				'訂單內沒有簽約商品，不需要簽約',
+				'redirect_before_thankyou 訂單內沒有簽約商品，不需要簽約',
 				'info',
 				[
 					'source'   => 'power-contract',
-					'order_id' => $order->get_id(),
+					'order_id' => $order?->get_id(),
+					'include_need_contract_product' => $include_need_contract_product,
+					'order_items' => $order?->get_items(),
+					'url' => $url,
 				]
 				);
 			return $url;
