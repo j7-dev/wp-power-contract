@@ -76,6 +76,7 @@ final class Bonnie {
 			function ( $order_id ) {
 				$order = \wc_get_order($order_id);
 				if ($order) {
+					\restore_current_blog();
 					$order->update_meta_data('_blog_id', (string) \get_current_blog_id());
 					$order->save();
 				}
@@ -241,6 +242,7 @@ final class Bonnie {
 				);
 
 		// 子站中的訂單完成時，都會循環執行，但只需要執行一次就好了
+		\restore_current_blog();
 		if ($order_blog_id !== \get_current_blog_id()) {
 			return;
 		}
@@ -430,6 +432,7 @@ final class Bonnie {
 	 * @return int|null
 	 */
 	public static function get_contract_template_id(): int|null {
+		\restore_current_blog();
 		$current_blog_id = \get_current_blog_id();
 		// 從主站(blog_id:1) 取得當前子站的合約模板
 		\switch_to_blog(1);
@@ -477,6 +480,7 @@ final class Bonnie {
 			return;
 		}
 
+		\restore_current_blog();
 		$blog_id  = \get_post_meta($post->ID, '_blog_id', true) ?: \get_current_blog_id();
 		$order_id = \get_post_meta($post->ID, '_order_id', true);
 
@@ -499,6 +503,7 @@ final class Bonnie {
 	 */
 	public static function override_signed_btn_link( $link ): string {
 		$order_id = (int) ( $_GET['order_id'] ?? 0 ); // phpcs:ignore
+		\restore_current_blog();
 		$blog_id  = (int) ( $_GET['blog_id'] ?? \get_current_blog_id() ); // phpcs:ignore
 		if (!$order_id) {
 			return $link;

@@ -58,6 +58,7 @@ final class Checkout {
 			$settings_dto->chosen_contract_template
 			);
 
+		\restore_current_blog();
 		$blog_id = \get_current_blog_id();
 		\switch_to_blog(1);
 		// 重導向資料紀錄在 url
@@ -94,11 +95,11 @@ final class Checkout {
 				'redirect_before_thankyou 訂單內沒有簽約商品，不需要簽約',
 				'info',
 				[
-					'source'   => 'power-contract',
-					'order_id' => $order?->get_id(),
+					'source'                        => 'power-contract',
+					'order_id'                      => $order?->get_id(),
 					'include_need_contract_product' => $include_need_contract_product,
-					'order_items' => $order?->get_items(),
-					'url' => $url,
+					'order_items'                   => $order?->get_items(),
+					'url'                           => $url,
 				]
 				);
 			return $url;
@@ -127,7 +128,8 @@ final class Checkout {
 
 		self::$origin_thankyou_url = $url;
 		$order_id                  = $order->get_id();
-		$blog_id                   = \get_current_blog_id();
+		\restore_current_blog();
+		$blog_id = \get_current_blog_id();
 
 		\switch_to_blog(1);
 		// 重導向資料紀錄在 url

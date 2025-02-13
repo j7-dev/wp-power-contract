@@ -68,6 +68,7 @@ final class Metabox {
 		// 獲取當前文章的網站 ID
 		$current_blog_id = \get_post_meta($post->ID, Integration::BLOG_ID_META_KEY, true);
 		if (!$current_blog_id) {
+			\restore_current_blog();
 			$current_blog_id = \get_current_blog_id();
 		}
 

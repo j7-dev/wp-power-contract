@@ -393,6 +393,7 @@ final class Shortcodes {
 		}
 
 		// TODO 如果當前用戶與訂單用戶不同，就不自動填入，防止被猜出其他用戶個資
+		// \restore_current_blog();
 		// $current_user_id = \get_current_user_id();
 		// if ($current_user_id !== $user->ID) {
 		// return $args;
