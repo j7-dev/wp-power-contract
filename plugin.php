@@ -38,13 +38,13 @@ final class Plugin {
 	public function __construct() {
 		// if your plugin depends on other plugins, you can add them here
 		$this->required_plugins = [
-			// [
-			// 'name'     => 'Powerhouse',
-			// 'slug'     => 'powerhouse',
-			// 'source'   => 'https://github.com/j7-dev/wp-powerhouse/releases/latest/download/powerhouse.zip',
-			// 'version'  => '2.0.6',
-			// 'required' => true,
-			// ],
+			[
+				'name'     => 'Powerhouse',
+				'slug'     => 'powerhouse',
+				'source'   => 'https://github.com/j7-dev/wp-powerhouse/releases/latest/download/powerhouse.zip',
+				'version'  => '3.0.2',
+				'required' => true,
+			],
 		];
 
 		$this->init(
