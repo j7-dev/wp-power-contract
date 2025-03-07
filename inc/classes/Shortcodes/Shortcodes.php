@@ -326,7 +326,7 @@ final class Shortcodes {
 		$blog_id = \get_post_meta($post->ID, Integration::BLOG_ID_META_KEY, true);
 
 		\switch_to_blog($blog_id);
-		$order_id = \get_post_meta($post->ID, 'order_id', true);
+		$order_id = $_GET['order_id'] ?? null; // phpcs:ignore
 		if (!$order_id) {
 			\restore_current_blog();
 			return '《找不到訂單 ID》';
