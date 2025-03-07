@@ -466,33 +466,49 @@ final class Bonnie {
 	 * @param string   $old_status 舊狀態
 	 * @param \WP_Post $post 合約文章物件
 	 * @return void
+	 * @throws \Exception 如果 Bonnie_Api 外掛不存在, 訂單 id 不存在, 則拋出例外
 	 */
 	public static function push_messages( $new_status, $old_status, $post ): void {
-		if (!class_exists('\Bonnie\Api\Bonnie_Api')) {
+		try {
+
+			if (!class_exists('\Bonnie\Api\Bonnie_Api')) {
+				throw new \Exception('Bonnie_Api 外掛不存在, \Bonnie\Api\Bonnie_Api class not found J7\PowerContract\LPA\Bonnie::push_messages');
+			}
+
+			\restore_current_blog();
+			$blog_id  = \get_post_meta($post->ID, '_blog_id', true) ?: \get_current_blog_id();
+			$order_id = \get_post_meta($post->ID, '_order_id', true);
+
+			if (!$order_id) {
+				throw new \Exception('訂單 id 不存在, order_id not found J7\PowerContract\LPA\Bonnie::push_messages');
+			}
+
+			// 切換到子站獲取資料
+			\switch_to_blog($blog_id);
 			\J7\WpUtils\Classes\WC::log(
-				'',
-				'Bonnie_Api 外掛不存在, \Bonnie\Api\Bonnie_Api class not found',
+				[
+					'order_id' => $order_id,
+					'blog_id'  => $blog_id,
+				],
+				"發送推播 [ '\Bonnie\Api\Bonnie_Api', 'send_course_permission_message' ] J7\PowerContract\LPA\Bonnie::push_messages",
 				'info',
 				[
 					'source' => 'power-contract',
 				]
 				);
-			return;
+			\call_user_func( [ '\Bonnie\Api\Bonnie_Api', 'send_course_permission_message' ], $order_id );
+			\call_user_func( [ '\Bonnie\Order', 'order_completed' ], $order_id );
+			\restore_current_blog();
+		} catch (\Throwable $th) {
+			\J7\WpUtils\Classes\WC::log(
+				'',
+				$th->getMessage(),
+				'info',
+				[
+					'source' => 'power-contract',
+				]
+				);
 		}
-
-		\restore_current_blog();
-		$blog_id  = \get_post_meta($post->ID, '_blog_id', true) ?: \get_current_blog_id();
-		$order_id = \get_post_meta($post->ID, '_order_id', true);
-
-		if (!$order_id) {
-			return;
-		}
-
-		// 切換到子站獲取資料
-		\switch_to_blog($blog_id);
-		\call_user_func( [ '\Bonnie\Api\Bonnie_Api', 'send_course_permission_message' ], $order_id );
-		\call_user_func( [ '\Bonnie\Order', 'order_completed' ], $order_id );
-		\restore_current_blog();
 	}
 
 	/**
