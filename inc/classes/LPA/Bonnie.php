@@ -65,7 +65,7 @@ final class Bonnie {
 		\add_action( 'woocommerce_order_status_completed', [ $this, 'push_bonnie_module_for_sign' ], 10, 1 );
 
 		// 簽約完成後推播訊息給 用戶
-		\add_action('power_contract_contract_created', [ $this, 'push_bonnie_module_to_user_for_archive' ], 10, 2);
+		\add_action('power_contract_contract_created', [ $this, 'push_bonnie_module_to_user_for_archive' ], 10, 3);
 
 		// 覆寫選擇的合約模板
 		\add_filter('power_contract_chosen_contract_template', [ __CLASS__, 'get_contract_template_id' ], 100, 1);
@@ -314,10 +314,12 @@ final class Bonnie {
 	 *
 	 * @param int                  $contract_id 合約 ID
 	 * @param array<string, mixed> $args 合約資料
+	 * @param string               $blog_id 子站 ID
 	 * @return void
 	 */
-	public function push_bonnie_module_to_user_for_archive( $contract_id, $args ): void {
+	public function push_bonnie_module_to_user_for_archive( $contract_id, $args, $blog_id ): void {
 
+		\switch_to_blog($blog_id);
 		$author_id = \get_post_field('post_author', $contract_id);
 
 		// bonnie 上的 user id
@@ -342,6 +344,7 @@ final class Bonnie {
 
 		$bonnie_push_instance = new BonniePush( $bot_raw_uid, $bot_pid );
 		$bonnie_push_instance->add_message( '已收到您的簽屬，請稍待專員審閱，完成後會立即通知您，就可以觀看課程了' );
+		\restore_current_blog();
 	}
 
 	/**

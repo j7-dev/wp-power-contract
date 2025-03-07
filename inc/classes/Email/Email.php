@@ -24,7 +24,7 @@ final class Email {
 	 * Constructor
 	 */
 	public function __construct() {
-		\add_action('power_contract_contract_created', [ __CLASS__, 'send_email' ], 10, 2);
+		\add_action('power_contract_contract_created', [ __CLASS__, 'send_email' ], 10, 3);
 	}
 
 	/**
@@ -32,9 +32,10 @@ final class Email {
 	 *
 	 * @param int                  $new_contract_id Contract ID
 	 * @param array<string, mixed> $args Arguments
+	 * @param string               $blog_id Blog ID
 	 * @return void
 	 */
-	public static function send_email( $new_contract_id, $args ): void {
+	public static function send_email( $new_contract_id, $args, $blog_id ): void {
 		$setting_dto = SettingsDTO::instance();
 
 		$subject  = self::get_subject( (int) $new_contract_id);

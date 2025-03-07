@@ -94,7 +94,7 @@ final class Ajax {
 		// insert data
 		$new_contract_id = \wp_insert_post( $args );
 
-		\do_action( 'power_contract_contract_created', $new_contract_id, $args );
+		\do_action( 'power_contract_contract_created', $new_contract_id, $args, $_POST['_blog_id'] ); // phpcs:ignore
 
 		$order_id     = ( (int) $args['meta_input']['_order_id'] ) ?? null;
 		$redirect     = $args['meta_input']['_redirect'] ?? null;
