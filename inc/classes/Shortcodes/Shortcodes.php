@@ -10,6 +10,7 @@ namespace J7\PowerContract\Shortcodes;
 use J7\PowerContract\Utils\Base;
 use J7\PowerContract\Admin\SettingsDTO;
 use J7\WpUtils\Classes\General;
+use J7\PowerContract\LPA\Multisite\Integration;
 
 if (class_exists('J7\PowerContract\Shortcodes\Shortcodes')) {
 	return;
@@ -286,7 +287,7 @@ final class Shortcodes {
 		];
 
 		$atts = \wp_parse_args(
-		$atts,
+		$params,
 		$default_atts,
 		);
 
@@ -318,13 +319,22 @@ final class Shortcodes {
 	 * @return string
 	 */
 	public static function pct_product_names_callback(): string {
-		$order_id = $_GET['order_id'] ?? null; // phpcs:ignore
+		global $post;
+		if (!$post) {
+			return '《找不到 $post》';
+		}
+		$blog_id = \get_post_meta($post->ID, Integration::BLOG_ID_META_KEY, true);
+
+		\switch_to_blog($blog_id);
+		$order_id = \get_post_meta($post->ID, 'order_id', true);
 		if (!$order_id) {
+			\restore_current_blog();
 			return '《找不到訂單 ID》';
 		}
 
 		$order = \wc_get_order($order_id);
 		if (!$order) {
+			\restore_current_blog();
 			return '《找不到訂單》';
 		}
 
@@ -334,6 +344,7 @@ final class Shortcodes {
 			$product_names
 		);
 
+		\restore_current_blog();
 		return implode(', ', $product_names);
 	}
 
@@ -377,18 +388,29 @@ final class Shortcodes {
 			return $args;
 		}
 
+		global $post;
+		if (!$post) {
+			return $args;
+		}
+		$blog_id = \get_post_meta($post->ID, Integration::BLOG_ID_META_KEY, true);
+
+		\switch_to_blog($blog_id);
+
 		$order_id = $_GET['order_id'] ?? null; // phpcs:ignore
 		if (!$order_id) {
+			\restore_current_blog();
 			return $args;
 		}
 
 		$order = \wc_get_order($order_id);
 		if (!$order) {
+			\restore_current_blog();
 			return $args;
 		}
 
 		$user = $order->get_user();
 		if (!$user) {
+			\restore_current_blog();
 			return $args;
 		}
 
@@ -412,7 +434,7 @@ final class Shortcodes {
 		};
 
 		$args['value'] = $value;
-
+		\restore_current_blog();
 		return $args;
 	}
 }
