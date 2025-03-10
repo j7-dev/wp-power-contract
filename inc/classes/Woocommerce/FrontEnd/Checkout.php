@@ -87,6 +87,11 @@ final class Checkout {
 	 */
 	public static function redirect_before_thankyou( $url, $order ): string {
 
+		// 如果是快速訂單的條件
+		if ( \current_user_can( 'manage_options' ) && ! isset( $_GET['show'] ) ) {
+			return $url;
+		}
+
 		// 如果沒有簽約商品也不用簽約
 		$include_need_contract_product = Utils::include_need_contract_product( $order );
 		if (!$include_need_contract_product) {

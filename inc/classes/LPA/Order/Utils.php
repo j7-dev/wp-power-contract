@@ -60,7 +60,7 @@ abstract class Utils {
 		foreach ($items as $item) {
 			/** @var \WC_Order_Item_Product $item */
 			$product_id = $item->get_product_id();
-			// 判斷是否為訂金商品(包含訂金分類)
+			// 判斷是否需要簽約
 			$need_contract = \get_post_meta( $product_id, Edit::NEED_CONTRACT_META_KEY, true ) === 'yes';
 			if ($need_contract) {
 				$include_need_contract_product = true;
