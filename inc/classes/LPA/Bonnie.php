@@ -76,7 +76,6 @@ final class Bonnie {
 			function ( $order_id ) {
 				$order = \wc_get_order($order_id);
 				if ($order) {
-					\restore_current_blog();
 					$order->update_meta_data('_blog_id', (string) \get_current_blog_id());
 					$order->save();
 				}
