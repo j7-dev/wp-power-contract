@@ -32,7 +32,10 @@ final class LifeCycle {
 	 * @param string   $old_status 舊狀態
 	 * @param \WP_Post $post 合約文章物件
 	 */
-	public static function after_contract_pending( $new_status, $old_status, $post ) {
+	public static function after_contract_pending( $new_status, $old_status, $post ): void {
+		if (Init::POST_TYPE !== $post->post_type) {
+			return;
+		}
 		if ( 'pending' !== $new_status ) {
 			return;
 		}
@@ -47,7 +50,10 @@ final class LifeCycle {
 	 * @param string   $old_status 舊狀態
 	 * @param \WP_Post $post 合約文章物件
 	 */
-	public static function after_contract_approved( $new_status, $old_status, $post ) {
+	public static function after_contract_approved( $new_status, $old_status, $post ): void {
+		if (Init::POST_TYPE !== $post->post_type) {
+			return;
+		}
 		if ( 'approved' !== $new_status ) {
 			return;
 		}
@@ -62,7 +68,10 @@ final class LifeCycle {
 	 * @param string   $old_status 舊狀態
 	 * @param \WP_Post $post 合約文章物件
 	 */
-	public static function after_contract_rejected( $new_status, $old_status, $post ) {
+	public static function after_contract_rejected( $new_status, $old_status, $post ): void {
+		if (Init::POST_TYPE !== $post->post_type) {
+			return;
+		}
 		if ( 'rejected' !== $new_status ) {
 			return;
 		}
