@@ -3,7 +3,7 @@
 	"version": "0.0.9",
 	"type": "module",
 	"scripts": {
-		"bootstrap": "pnpm && composer install --no-interaction",
+		"bootstrap": "composer install --no-interaction",
 		"dev": "vite",
 		"prebuild": "echo 'todo: remove console'",
 		"build": "vite build",
