@@ -497,8 +497,7 @@ final class Init {
 		// add signed_at
 		// get local time
 		$post                   = \get_post( $post_id );
-		$signed_at_timestamp    = \get_the_date( 'U', $post );
-		$signed_at              = \wp_date( 'Y-m-d H:i:s', $signed_at_timestamp );
+		$signed_at    = \get_the_date( 'Y-m-d H:i:s', $post );
 		$post_meta['signed_at'] = [ $signed_at ];
 
 		// 如果有訂單關聯，則新增訂單資訊
