@@ -80,9 +80,15 @@ declare const signature_pad_custom_data: {
 							},
 						)
 
-						if ($('.pct__signature img').length === 0) {
-							isValid = false
+
+						// 是否啟用簽名功能，有啟用才判斷有沒有簽名
+						if ($('.pct__signature')?.length !== 0) {
+							if ($('.pct__signature img').length === 0) {
+								isValid = false
+							}
 						}
+
+
 						return isValid
 					}
 
