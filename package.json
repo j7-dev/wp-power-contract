@@ -5,7 +5,7 @@
 	"scripts": {
 		"bootstrap": "composer install --no-interaction",
 		"dev": "vite",
-		"prebuild": "echo 'todo: remove console'",
+
 		"build": "vite build",
 		"preview": "vite preview",
 		"format": "prettier-eslint --write \"js/src/**/*.tsx\"",
