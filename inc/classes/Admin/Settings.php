@@ -25,7 +25,7 @@ final class Settings {
 	/**
 	 * Tabs
 	 *
-	 * @var array<string, array{title: string, disabled?: bool}>
+	 * @var array<string, array{title: string, disabled: bool, content: string}>
 	 */
 	public $tabs = [];
 

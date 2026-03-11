@@ -27,25 +27,25 @@ final class SettingsDTO extends DTO {
 	 * @var string
 	 * 填完合約 Modal 標題
 	 */
-	public $ajax_signed_title;
+	public string $ajax_signed_title = '';
 
 	/**
 	 * @var string
 	 * 填完合約 Modal 描述
 	 */
-	public $ajax_signed_description;
+	public string $ajax_signed_description = '';
 
 	/**
 	 * @var string
 	 * 填完合約 Modal 按鈕文字，空的話會隱藏
 	 */
-	public $ajax_signed_btn_text;
+	public string $ajax_signed_btn_text = '';
 
 	/**
 	 * @var string
 	 * 填完合約 Modal 按鈕連結
 	 */
-	public $ajax_signed_btn_link;
+	public string $ajax_signed_btn_link = '';
 
 	/**
 	 * @var bool

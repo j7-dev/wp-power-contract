@@ -20,13 +20,6 @@ final class Checkout {
 	use \J7\WpUtils\Traits\SingletonTrait;
 
 	/**
-	 * 原來的結帳完成頁面
-	 *
-	 * @var string
-	 */
-	private static $origin_thankyou_url;
-
-	/**
 	 * Constructor
 	 */
 	public function __construct() {
@@ -99,8 +92,6 @@ final class Checkout {
 		if (!$chosen_contract_template) {
 			return $url;
 		}
-
-		self::$origin_thankyou_url = $url;
 
 		// 重導向資料紀錄在 url
 		$url = \add_query_arg(

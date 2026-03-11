@@ -108,7 +108,7 @@ final class Shortcodes {
 	 * 短碼 pct_input callback
 	 * 輸入框
 	 *
-	 * @param array $params 短碼參數
+	 * @param array<string, string> $params 短碼參數
 	 * @return string
 	 */
 	public static function pct_input_callback( array $params ): string {
@@ -160,7 +160,7 @@ final class Shortcodes {
 	/**
 	 * 顯示公司章 (featured image)
 	 *
-	 * @param array $params 短碼參數
+	 * @param array<string, string> $params 短碼參數
 	 * @return string
 	 */
 	public static function pct_seal_callback( array $params ): string {
@@ -211,7 +211,7 @@ final class Shortcodes {
 	/**
 	 * 簽名板
 	 *
-	 * @param array $params 短碼參數
+	 * @param array<string, string> $params 短碼參數
 	 * @return string
 	 */
 	public static function pct_signature_callback( array $params ): string {
@@ -270,7 +270,7 @@ final class Shortcodes {
 	/**
 	 * 顯示日期
 	 *
-	 * @param array|null $atts 短碼參數
+	 * @param array<string, string>|null $atts 短碼參數
 	 * @return string
 	 */
 	public static function pct_date_callback( ?array $atts ): string {
@@ -300,7 +300,7 @@ final class Shortcodes {
 	/**
 	 * 顯示 IP
 	 *
-	 * @param array|null $atts 短碼參數
+	 * @param array<string, string>|null $atts 短碼參數
 	 * @return string
 	 */
 	public static function pct_ip_callback( ?array $atts ): string {
@@ -313,8 +313,8 @@ final class Shortcodes {
 	/**
 	 * 設定預設值
 	 *
-	 * @param array $args 輸入框的參數
-	 * @return array 輸入框的參數
+	 * @param array<string, mixed> $args 輸入框的參數
+	 * @return array<string, mixed> 輸入框的參數
 	 */
 	public static function set_default_value( array $args ): array {
 		$settings_dto = SettingsDTO::instance();

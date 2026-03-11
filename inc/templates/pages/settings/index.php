@@ -13,7 +13,7 @@ echo '<h1>' . \esc_html__('Contract Template Settings', 'power_contract') . '</h
 
 
 /*
-printf(
+Printf(
 '
 <sl-alert open class="mt-8 mb-4">
 <sl-icon slot="icon" name="info-circle"></sl-icon>

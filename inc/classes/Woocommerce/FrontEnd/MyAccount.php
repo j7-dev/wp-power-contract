@@ -46,7 +46,7 @@ final class MyAccount {
 	 * @param int $order_id 訂單 ID
 	 * @return void
 	 */
-	public static function display_contract_in_myaccount_order( $order_id ) {
+	public static function display_contract_in_myaccount_order( $order_id ): void {
 
 		$contracts = \get_posts(
 			[
@@ -54,7 +54,7 @@ final class MyAccount {
 				'numberposts' => -1,
 				'post_status' => [ 'approved', 'pending', 'rejected' ],
 				'meta_key'    => '_order_id',
-				'meta_value'  => $order_id,
+				'meta_value'  => (string) $order_id,
 			]
 			);
 

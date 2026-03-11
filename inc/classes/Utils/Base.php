@@ -49,7 +49,7 @@ abstract class Base {
 	 * @param string $type 地址類型 billing 或 shipping
 	 * @return string 用戶的完整地址
 	 */
-	public static function get_full_address( $user_id, $type = 'billing' ) {
+	public static function get_full_address( int $user_id, string $type = 'billing' ): string {
 
 		$fields = [
 			"_{$type}_postcode",

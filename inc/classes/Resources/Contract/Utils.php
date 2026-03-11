@@ -18,8 +18,8 @@ abstract class Utils {
 	/**
 	 * 取得訂單的合約
 	 *
-	 * @param int        $order_id 訂單 ID
-	 * @param array|null $args 額外參數
+	 * @param int                       $order_id 訂單 ID
+	 * @param array<string, mixed>|null $args 額外參數
 	 * @return \WP_Post[]|int[]
 	 */
 	public static function get_contracts_by_order_id( int $order_id, ?array $args = null ) {

@@ -243,8 +243,10 @@ final class Init {
 
 	/**
 	 * Handle reject contract action.
+	 *
+	 * @return void
 	 */
-	public static function handle_reject_contract() {
+	public static function handle_reject_contract(): void {
 		if ( isset( $_GET['post_id'] ) && ! empty( $_GET['post_id'] ) ) {
 			$post_id = intval( $_GET['post_id'] );
 			$post    = get_post( $post_id );
@@ -264,8 +266,10 @@ final class Init {
 
 	/**
 	 * Handle approve contract action.
+	 *
+	 * @return void
 	 */
-	public static function handle_approve_contract() {
+	public static function handle_approve_contract(): void {
 		if ( isset( $_GET['post_id'] ) && ! empty( $_GET['post_id'] ) ) {
 			$post_id = intval( $_GET['post_id'] );
 			$post    = get_post( $post_id );
@@ -286,8 +290,8 @@ final class Init {
 	/**
 	 * 新增欄位
 	 *
-	 * @param array $columns 欄位
-	 * @return array
+	 * @param array<string, string> $columns 欄位
+	 * @return array<string, string>
 	 */
 	public function add_columns( array $columns ): array {
 		// status 放在 title 後面
@@ -398,8 +402,8 @@ final class Init {
 	/**
 	 * 新增自訂 bulk actions
 	 *
-	 * @param array $bulk_actions 自訂 bulk actions
-	 * @return array
+	 * @param array<string, string> $bulk_actions 自訂 bulk actions
+	 * @return array<string, string>
 	 */
 	public function add_bulk_actions( array $bulk_actions ): array {
 		$bulk_actions['change-to-pending']  = __('Change to Pending', 'power_contract');
@@ -412,9 +416,9 @@ final class Init {
 	/**
 	 * 處理自訂 bulk actions
 	 *
-	 * @param string $redirect_url 重定向 URL
-	 * @param string $action 動作
-	 * @param array  $post_ids 文章 ID 陣列
+	 * @param string     $redirect_url 重定向 URL
+	 * @param string     $action 動作
+	 * @param array<int> $post_ids 文章 ID 陣列
 	 * @return string
 	 */
 	public function handle_bulk_actions( string $redirect_url, string $action, array $post_ids ): string {
@@ -476,9 +480,9 @@ final class Init {
 	/**
 	 * 調整 post meta 新增/刪除顯示欄位
 	 *
-	 * @param int   $post_id 文章 ID
-	 * @param array $post_meta 文章 meta
-	 * @return array
+	 * @param int                         $post_id 文章 ID
+	 * @param array<string, array<mixed>> $post_meta 文章 meta
+	 * @return array<string, array<mixed>>
 	 */
 	private static function post_meta_format( int $post_id, array $post_meta ): array {
 		unset($post_meta['_edit_lock']);
@@ -515,7 +519,7 @@ final class Init {
 				$customer_address = Base::get_full_address($customer_id, 'shipping');
 
 				$order_array = [
-					'relation_order_id' => $order ? [ sprintf('<a href="%1$s" target="_blank">%2$s</a>', $order_link, "#{$order_number}") ] : [ '' ],
+					'relation_order_id' => [ sprintf('<a href="%1$s" target="_blank">%2$s</a>', $order_link, "#{$order_number}") ],
 					'customer_name'     => [ $customer_name ],
 					'customer_email'    => [ $customer_email ],
 					'customer_phone'    => [ $customer_phone ],

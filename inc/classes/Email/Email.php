@@ -42,9 +42,11 @@ final class Email {
 		$edit_url = \get_edit_post_link( $new_contract_id );
 
 		$body = sprintf('<br><br><a href="%1$s" target="_blank">前往審核</a><br><br>', $edit_url);
-		\ob_start();
-		Contract::render_meta_box( $post );
-		$body .= \ob_get_clean();
+		if ( $post instanceof \WP_Post ) {
+			\ob_start();
+			Contract::render_meta_box( $post );
+			$body .= (string) \ob_get_clean();
+		}
 
 		$headers = [ 'Content-Type: text/html; charset=UTF-8' ];
 

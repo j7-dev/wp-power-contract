@@ -30,8 +30,10 @@ final class Ajax {
 
 	/**
 	 * Create Contract
+	 *
+	 * @return void
 	 */
-	public static function create_contract() {
+	public static function create_contract(): void {
 		// 驗證 nonce
 		if ( !\check_ajax_referer( Plugin::$kebab, 'nonce' ) ) {
 			\wp_send_json_error(
@@ -47,12 +49,13 @@ final class Ajax {
 		unset( $_POST['action'] );
 		$post_data               = WP::sanitize_text_field_deep( $_POST, false, [ 'screenshot', 'signature' ] );
 		$post_data['client_ip']  = General::get_client_ip();
-		$include_required_params = WP::include_required_params( $post_data, [ 'contract_template_id' ] );
-		if ( true !== $include_required_params ) {
+		try {
+			WP::include_required_params( $post_data, [ 'contract_template_id' ] );
+		} catch ( \Exception $e ) {
 			\wp_send_json_error(
 				[
 					'code'    => 'sign_error',
-					'message' => $include_required_params->get_error_message(),
+					'message' => $e->getMessage(),
 				]
 			);
 		}
@@ -91,7 +94,7 @@ final class Ajax {
 
 		\do_action( 'power_contract_contract_created', $new_contract_id, $args );
 
-		$order_id     = ( (int) $args['meta_input']['_order_id'] ) ?? null;
+		$order_id     = isset( $args['meta_input']['_order_id'] ) ? (int) $args['meta_input']['_order_id'] : null;
 		$redirect     = $args['meta_input']['_redirect'] ?? null;
 		$redirect_url = self::get_redirect_url($order_id, $redirect);
 

@@ -70,5 +70,5 @@ __('Choose contract template', 'power_contract'),
 SettingsDTO::get_field_name('chosen_contract_template'),
 __('You can override the value by add filter `power_contract_chosen_contract_template` ', 'power_contract'),
 $options,
-$settings_dto->chosen_contract_template ?? '',
+$settings_dto->chosen_contract_template,
 );

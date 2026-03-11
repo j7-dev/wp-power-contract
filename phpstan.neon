@@ -3,10 +3,7 @@ parameters:
 	paths:
 		- plugin.php
 		- inc/
-	ignoreErrors:
-		- '#Constant .* not found#'
-		- '#Function .* not found#'
-		- '#Cannot cast mixed to .*#'
+	ignoreErrors: []
 	excludePaths:
 		- js/*
 		- vendor/*
@@ -14,3 +11,4 @@ parameters:
 	bootstrapFiles:
 		- vendor/php-stubs/wordpress-stubs/wordpress-stubs.php
 		- vendor/php-stubs/woocommerce-stubs/woocommerce-stubs.php
+		- stubs/wp-utils.stub.php

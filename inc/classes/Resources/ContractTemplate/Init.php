@@ -212,7 +212,7 @@ final class Init {
 		if ( isset( $_FILES['seal'] ) && $_FILES['seal']['error'] === UPLOAD_ERR_OK ) { //phpcs:ignore
 			$uploaded_files = WP::upload_files( $_FILES['seal'], true ); //phpcs:ignore
 
-			if ( ! \is_wp_error( $uploaded_files ) && isset( $uploaded_files[0]['url'] ) ) {
+			if ( isset( $uploaded_files[0]['url'] ) ) {
 				\update_post_meta( $post_id, 'seal_url', $uploaded_files[0]['url'] );
 			}
 		}
@@ -221,8 +221,9 @@ final class Init {
 	/**
 	 * 儲存區塊編輯器的自訂欄位資料
 	 *
-	 * @param \WP_Post         $post     已儲存的文章物件
-	 * @param \WP_REST_Request $request  請求物件
+	 * @param \WP_Post         $post    已儲存的文章物件
+	 * @param \WP_REST_Request $request 請求物件
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 */
 	public static function save_block_editor_metabox( \WP_Post $post, \WP_REST_Request $request ): void {
 		$params = $request->get_params();
@@ -237,6 +238,7 @@ final class Init {
 	 * Set {Plugin::$kebab}/{slug}/report  php template
 	 *
 	 * @param string|null $template Template.
+	 * @return string|null
 	 */
 	public static function load_custom_template( $template ) {
 		if (!\is_singular(self::POST_TYPE)) {

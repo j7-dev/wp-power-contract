@@ -34,10 +34,10 @@ final class Orders {
 	/**
 	 * 新增合約欄位到訂單列表
 	 *
-	 * @param array $columns 訂單列表欄位
-	 * @return array
+	 * @param array<string, string> $columns 訂單列表欄位
+	 * @return array<string, string>
 	 */
-	public static function add_contract_column( $columns ) {
+	public static function add_contract_column( array $columns ): array {
 		$new_columns = [
 			'contract' => __('Contract', 'power_contract'),
 		];
@@ -50,8 +50,9 @@ final class Orders {
 	 *
 	 * @param string        $column 欄位名稱
 	 * @param \WC_Order|int $order_or_post_id 訂單(HPOS)或文章 ID
+	 * @return void
 	 */
-	public static function display_contract_column( $column, $order_or_post_id ) {
+	public static function display_contract_column( $column, $order_or_post_id ): void {
 		if ($column === 'contract') {
 			$order_id     = (int) ( \is_numeric( $order_or_post_id ) ? $order_or_post_id : $order_or_post_id->get_id() );
 			$contract_ids = ContractUtils::get_contracts_by_order_id(
