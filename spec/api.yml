@@ -1,0 +1,221 @@
+openapi: 3.0.3
+info:
+  title: Power Contract AJAX API
+  description: |
+    Power Contract 外掛使用 WordPress AJAX（`admin-ajax.php`）進行合約簽署，
+    以及 WordPress admin-post.php 處理合約審核操作。
+
+    ## 錯誤碼對應規則
+    - **400** = 前置（參數）Rules 驗證失敗（如 nonce 錯誤、缺少必填參數）
+    - **403** = 前置（狀態）Rules 不符（如權限不足）
+    - **404** = 資源找不到
+
+    ## 認證
+    - 前端簽署 API 支援已登入與未登入用戶（`wp_ajax` + `wp_ajax_nopriv`）
+    - 已登入用戶需帶 WordPress cookie
+    - nonce 透過 `wp_localize_script` 注入前端
+    - 管理端操作需要 WordPress 登入 session
+  version: "0.0.10"
+
+servers:
+  - url: /wp-admin/admin-ajax.php
+    description: WordPress AJAX endpoint
+  - url: /wp-admin/admin-post.php
+    description: WordPress Admin Post endpoint
+
+tags:
+  - name: Contract
+    description: 合約簽署與審核相關操作
+
+components:
+  schemas:
+    CreateContractRequest:
+      type: object
+      required:
+        - action
+        - nonce
+        - contract_template_id
+      properties:
+        action:
+          type: string
+          enum: [create_contract]
+          description: WordPress AJAX action 名稱
+        nonce:
+          type: string
+          description: WordPress AJAX nonce，由 wp_localize_script 注入
+        contract_template_id:
+          type: integer
+          description: 合約模板 ID
+        user_name:
+          type: string
+          description: 簽署者姓名
+        user_address:
+          type: string
+          description: 簽署者地址
+        user_identity:
+          type: string
+          description: 簽署者身分證字號
+        user_phone:
+          type: string
+          description: 簽署者手機號碼
+        contract_amount:
+          type: string
+          description: 合約金額
+        signature:
+          type: string
+          format: base64
+          description: 簽名圖片 base64 data URI
+        screenshot:
+          type: string
+          format: base64
+          description: 合約頁面截圖 base64 data URI
+        _order_id:
+          type: integer
+          description: 關聯的 WooCommerce 訂單 ID
+        _redirect:
+          type: string
+          enum: [checkout, thankyou]
+          description: 簽署後重導向目標
+
+    CreateContractSuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            code:
+              type: string
+              example: sign_success
+            message:
+              type: string
+              example: ""
+            redirect_url:
+              type: string
+              description: 重導向 URL（若有設定 _redirect 參數）
+              example: "https://example.com/checkout/?is_signed=yes"
+
+    CreateContractErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        data:
+          type: object
+          properties:
+            title:
+              type: string
+              example: "OOPS! 合約簽屬中發生錯誤!"
+            description:
+              type: string
+              example: "nonce 錯誤或過期，請重新整理頁面"
+
+    CreateContractParamErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        data:
+          type: object
+          properties:
+            code:
+              type: string
+              example: sign_error
+            message:
+              type: string
+              example: "Missing required params: contract_template_id"
+
+paths:
+  /?action=create_contract:
+    post:
+      tags: [Contract]
+      summary: 建立合約（客戶簽署）
+      operationId: CreateContract
+      description: |
+        客戶在合約模板前端頁面填寫欄位、簽名後送出，建立一筆合約紀錄。
+        支援已登入與未登入用戶。合約建立後狀態為 pending，並觸發通知信。
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/CreateContractRequest"
+      responses:
+        "200":
+          description: 合約建立成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateContractSuccessResponse"
+        "400":
+          description: nonce 錯誤或缺少必填參數
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/CreateContractErrorResponse"
+                  - $ref: "#/components/schemas/CreateContractParamErrorResponse"
+
+  /?action=approve_contract:
+    get:
+      tags: [Contract]
+      summary: 核准合約
+      operationId: ApproveContract
+      description: |
+        管理員在合約編輯頁面點擊「Approve」按鈕，將合約狀態改為 approved。
+        操作完成後重導向至合約列表頁。
+      parameters:
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [approve_contract]
+        - name: post_id
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: 合約 ID
+      responses:
+        "302":
+          description: 核准成功，重導向至合約列表頁
+          headers:
+            Location:
+              schema:
+                type: string
+                example: /wp-admin/edit.php?post_type=contract
+
+  /?action=reject_contract:
+    get:
+      tags: [Contract]
+      summary: 拒絕合約
+      operationId: RejectContract
+      description: |
+        管理員在合約編輯頁面點擊「Reject」按鈕，將合約狀態改為 rejected。
+        操作完成後重導向至合約列表頁。
+      parameters:
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [reject_contract]
+        - name: post_id
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: 合約 ID
+      responses:
+        "302":
+          description: 拒絕成功，重導向至合約列表頁
+          headers:
+            Location:
+              schema:
+                type: string
+                example: /wp-admin/edit.php?post_type=contract
