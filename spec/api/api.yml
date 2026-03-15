@@ -1,9 +1,10 @@
 openapi: 3.0.3
 info:
-  title: Power Contract AJAX API
+  title: Power Contract API
   description: |
     Power Contract 外掛使用 WordPress AJAX（`admin-ajax.php`）進行合約簽署，
-    以及 WordPress admin-post.php 處理合約審核操作。
+    以及 WordPress `admin-post.php` 處理合約審核操作。
+    設定使用 WordPress Settings API（`options.php`）。
 
     ## 錯誤碼對應規則
     - **400** = 前置（參數）Rules 驗證失敗（如 nonce 錯誤、缺少必填參數）
@@ -14,7 +15,7 @@ info:
     - 前端簽署 API 支援已登入與未登入用戶（`wp_ajax` + `wp_ajax_nopriv`）
     - 已登入用戶需帶 WordPress cookie
     - nonce 透過 `wp_localize_script` 注入前端
-    - 管理端操作需要 WordPress 登入 session
+    - 管理端操作需要 WordPress 登入 session + manage_options/edit_post 權限
   version: "0.0.10"
 
 servers:
@@ -22,10 +23,18 @@ servers:
     description: WordPress AJAX endpoint
   - url: /wp-admin/admin-post.php
     description: WordPress Admin Post endpoint
+  - url: /wp-admin/options.php
+    description: WordPress Settings API endpoint
 
 tags:
   - name: Contract
     description: 合約簽署與審核相關操作
+  - name: ContractTemplate
+    description: 合約模板管理
+  - name: Settings
+    description: 外掛設定管理
+  - name: WooCommerce
+    description: WooCommerce 結帳整合
 
 components:
   schemas:
@@ -68,14 +77,14 @@ components:
         screenshot:
           type: string
           format: base64
-          description: 合約頁面截圖 base64 data URI
+          description: 合約頁面截圖 base64 data URI（由 html2canvas 產生）
         _order_id:
           type: integer
-          description: 關聯的 WooCommerce 訂單 ID
+          description: 關聯的 WooCommerce 訂單 ID（選填）
         _redirect:
           type: string
           enum: [checkout, thankyou]
-          description: 簽署後重導向目標
+          description: 簽署後重導向目標（選填）
 
     CreateContractSuccessResponse:
       type: object
@@ -97,7 +106,7 @@ components:
               description: 重導向 URL（若有設定 _redirect 參數）
               example: "https://example.com/checkout/?is_signed=yes"
 
-    CreateContractErrorResponse:
+    CreateContractNonceErrorResponse:
       type: object
       properties:
         success:
@@ -129,15 +138,53 @@ components:
               type: string
               example: "Missing required params: contract_template_id"
 
+    SettingsRequest:
+      type: object
+      properties:
+        power_contract_settings:
+          type: object
+          properties:
+            ajax_signed_title:
+              type: string
+              description: 簽署完成 Modal 標題
+            ajax_signed_description:
+              type: string
+              description: 簽署完成 Modal 描述（支援 HTML）
+            ajax_signed_btn_text:
+              type: string
+              description: 簽署完成 Modal 按鈕文字（空白則隱藏按鈕）
+            ajax_signed_btn_link:
+              type: string
+              description: 簽署完成 Modal 按鈕連結
+            display_order_info:
+              type: boolean
+              description: 是否自動帶入訂單資訊
+            display_contract_before_checkout:
+              type: boolean
+              description: 結帳前顯示合約
+            display_contract_after_checkout:
+              type: boolean
+              description: 結帳後、感謝頁前顯示合約
+            emails:
+              type: array
+              items:
+                type: string
+              description: 通知信收件人列表
+            chosen_contract_template:
+              type: string
+              description: 結帳流程使用的合約模板 ID
+
 paths:
   /?action=create_contract:
     post:
       tags: [Contract]
       summary: 建立合約（客戶簽署）
-      operationId: CreateContract
+      operationId: createContract
       description: |
         客戶在合約模板前端頁面填寫欄位、簽名後送出，建立一筆合約紀錄。
-        支援已登入與未登入用戶。合約建立後狀態為 pending，並觸發通知信。
+        支援已登入與未登入用戶（wp_ajax + wp_ajax_nopriv）。
+        合約建立後狀態為 pending，並觸發 power_contract_contract_created action 寄送通知信。
+        若有 _redirect 參數，回傳重導向 URL。
       requestBody:
         required: true
         content:
@@ -157,17 +204,19 @@ paths:
             application/json:
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/CreateContractErrorResponse"
+                  - $ref: "#/components/schemas/CreateContractNonceErrorResponse"
                   - $ref: "#/components/schemas/CreateContractParamErrorResponse"
 
   /?action=approve_contract:
     get:
       tags: [Contract]
       summary: 核准合約
-      operationId: ApproveContract
+      operationId: approveContract
       description: |
         管理員在合約編輯頁面點擊「Approve」按鈕，將合約狀態改為 approved。
-        操作完成後重導向至合約列表頁。
+        操作透過 admin-post.php 處理，完成後重導向至合約列表頁。
+        僅對 post_type 為 contract 的文章生效。
+        觸發 power_contract_contract_approved action。
       parameters:
         - name: action
           in: query
@@ -194,10 +243,12 @@ paths:
     get:
       tags: [Contract]
       summary: 拒絕合約
-      operationId: RejectContract
+      operationId: rejectContract
       description: |
         管理員在合約編輯頁面點擊「Reject」按鈕，將合約狀態改為 rejected。
-        操作完成後重導向至合約列表頁。
+        操作透過 admin-post.php 處理，完成後重導向至合約列表頁。
+        僅對 post_type 為 contract 的文章生效。
+        觸發 power_contract_contract_rejected action。
       parameters:
         - name: action
           in: query
@@ -219,3 +270,53 @@ paths:
               schema:
                 type: string
                 example: /wp-admin/edit.php?post_type=contract
+
+  /wp-admin/edit.php?post_type=contract:
+    get:
+      tags: [Contract]
+      summary: 合約列表（Bulk Actions）
+      operationId: bulkChangeContractStatus
+      description: |
+        管理員在合約列表頁透過 WordPress Bulk Actions 批量變更合約狀態。
+        支援 change-to-pending、change-to-approved、change-to-rejected 三種操作。
+        操作完成後顯示提示訊息。
+      parameters:
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [change-to-pending, change-to-approved, change-to-rejected]
+        - name: post[]
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: integer
+          description: 要變更的合約 ID 陣列
+      responses:
+        "302":
+          description: 批量操作完成，重導向回列表頁並帶成功提示
+
+  /wp-admin/options.php:
+    post:
+      tags: [Settings]
+      summary: 更新外掛設定
+      operationId: updateSettings
+      description: |
+        管理員在設定頁面透過 WordPress Settings API 儲存外掛設定。
+        設定頁面包含三個分頁：General（簽署完成 Modal）、Woocommerce（整合選項）、Email（通知信收件人）。
+        需要 manage_options 權限。
+        設定存於 wp_options key: power_contract_settings。
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/SettingsRequest"
+      responses:
+        "302":
+          description: 設定儲存成功，重導向回設定頁面
+        "403":
+          description: 權限不足

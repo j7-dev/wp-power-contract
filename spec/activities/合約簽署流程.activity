@@ -1,0 +1,34 @@
+[ACTIVITY] 合約簽署流程
+
+[ACTOR] Admin -> {specs/actors/Admin.md}
+[ACTOR] Customer -> {specs/actors/Customer.md}
+[ACTOR] System -> {specs/actors/System.md}
+[ACTOR] WooCommerce -> {specs/actors/WooCommerce.md}
+
+[STEP:1] @Admin {features/contract-template/儲存合約模板公司章.feature}
+[STEP:2] @Admin {features/settings/更新外掛設定.feature}
+
+[STEP:3] @Customer {features/contract/建立合約.feature}
+[FORK:3a]
+  [PARALLEL:3a] @System {features/contract/寄送合約通知信.feature}
+  [PARALLEL:3a] @Customer {features/contract/簽署完成顯示Modal.feature}
+[JOIN:3a]
+
+[DECISION:3b] 合約審核結果？
+  [BRANCH:3b:核准] @Admin {features/contract/核准合約.feature}
+  [BRANCH:3b:拒絕] @Admin {features/contract/拒絕合約.feature}
+[MERGE:3b]
+
+[STEP:4] @Admin {features/contract/批量變更合約狀態.feature}
+
+[STEP:5] @Admin {features/contract/合約列表.feature}
+[STEP:6] @Admin {features/contract/查看合約詳情.feature}
+
+[DECISION:6a] WooCommerce 是否啟用？
+  [BRANCH:6a:啟用] @Admin {features/woocommerce/訂單中查看合約.feature}
+  [BRANCH:6a:未啟用] {specs/ui/無WooCommerce.md}
+[MERGE:6a]
+
+[STEP:7] @Customer {features/woocommerce/我的帳號查看合約.feature}
+
+[END]

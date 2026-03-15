@@ -1,0 +1,127 @@
+// Power Contract -- Entity Relationship Model
+// Version: 0.0.10 | Date: 2026-03-12
+// 本外掛使用 WordPress Custom Post Type，無自訂資料表，
+// 以下以 wp_posts + wp_postmeta 描述邏輯結構。
+
+Enum contract_status {
+  pending  [note: '待審核 -- 客戶已簽署，等待管理員審閱']
+  approved [note: '已核准 -- 管理員審閱通過']
+  rejected [note: '已拒絕 -- 管理員審閱不通過']
+}
+
+Enum contract_template_status {
+  publish [note: '已發佈 -- 可供客戶簽署']
+  draft   [note: '草稿 -- 尚未公開']
+}
+
+Table contract_template {
+  ID            bigint    [pk, increment, note: 'WordPress post ID']
+  post_title    varchar   [not null, note: '合約模板名稱']
+  post_content  longtext  [note: '合約模板內容，含 shortcode（pct_input, pct_seal, pct_signature, pct_date, pct_ip）']
+  post_status   contract_template_status [not null, default: 'draft', note: '模板狀態']
+  post_date     datetime  [note: '建立時間']
+  post_modified datetime  [note: '修改時間']
+  post_author   bigint    [note: '建立者 user ID']
+
+  Note: '''
+    Custom Post Type: contract_template
+    管理員用來定義合約版面、欄位與公司章的模板。
+    前端以 single-contract_template.php 模板渲染。
+    支援 WordPress 區塊編輯器與傳統編輯器。
+    Shortcodes:
+    - [pct_input name="..." width="..." placeholder="..."] 輸入框
+    - [pct_seal style="..." class="..."] 公司章圖片
+    - [pct_signature style="..." class="..."] 簽名板
+    - [pct_date format="..." base="tw|ad"] 日期
+    - [pct_ip] 用戶 IP
+  '''
+}
+
+Table contract_template_meta {
+  meta_id   bigint    [pk, increment]
+  post_id   bigint    [not null, note: '對應 contract_template.ID']
+  meta_key  varchar   [not null]
+  meta_value longtext
+
+  indexes {
+    (post_id, meta_key) [name: 'post_id_meta_key']
+  }
+
+  Note: '''
+    contract_template 的 post_meta 欄位：
+    - seal_url (string): 公司章圖片 URL，透過 Seal Image metabox 上傳或 REST API 設定
+  '''
+}
+
+Table contract {
+  ID            bigint    [pk, increment, note: 'WordPress post ID']
+  post_title    varchar   [not null, note: '自動產生：{模板名稱} 合約 - {用戶姓名} 對應 user_id: #{user_id}']
+  post_status   contract_status [not null, default: 'pending', note: '合約審核狀態']
+  post_author   bigint    [note: '簽署者 user ID（訪客為 0）']
+  post_date     datetime  [note: '簽署時間']
+  post_modified datetime  [note: '修改時間']
+
+  Note: '''
+    Custom Post Type: contract
+    客戶簽署後產生的合約紀錄，管理員可審核（核准/拒絕）。
+    不公開（public=false）、不可前端查詢（publicly_queryable=false），僅在後台管理。
+    顯示在 contract_template 選單下作為子選單。
+    支援 Bulk Actions: change-to-pending, change-to-approved, change-to-rejected。
+    自訂 post_status: pending, approved, rejected。
+    移除預設的 submitdiv metabox，改用 Approval metabox（Approve/Reject 按鈕）。
+  '''
+}
+
+Table contract_meta {
+  meta_id    bigint    [pk, increment]
+  post_id    bigint    [not null, note: '對應 contract.ID']
+  meta_key   varchar   [not null]
+  meta_value longtext
+
+  indexes {
+    (post_id, meta_key) [name: 'post_id_meta_key']
+  }
+
+  Note: '''
+    contract 的 post_meta 欄位：
+    - contract_template_id (int): 來源合約模板 ID [必填]
+    - user_name (string): 簽署者姓名
+    - user_address (string): 簽署者地址
+    - user_identity (string): 簽署者身分證字號
+    - user_phone (string): 簽署者手機號碼
+    - contract_amount (string): 合約金額
+    - signature (string/base64): 簽名圖片 data URI
+    - screenshot_url (string): 合約截圖 URL（由 html2canvas 截圖上傳後存儲）
+    - client_ip (string): 簽署時客戶端 IP
+    - _order_id (int): 關聯 WooCommerce 訂單 ID（選填）
+    - _redirect (string): 簽署後重導向目標 checkout|thankyou（選填）
+  '''
+}
+
+Table wp_options_settings {
+  option_id    bigint    [pk, increment]
+  option_name  varchar   [unique, default: 'power_contract_settings', note: 'wp_options key']
+  option_value longtext  [note: '序列化的設定陣列']
+
+  Note: '''
+    外掛設定（存於 wp_options，key: power_contract_settings）：
+    --- General 分頁 ---
+    - ajax_signed_title (string): 簽署完成 Modal 標題，預設「已收到您的合約簽屬，等待審閱!」
+    - ajax_signed_description (string): 簽署完成 Modal 描述（支援 HTML），預設「審閱完成後會立即通知您，並為您開通課程」
+    - ajax_signed_btn_text (string): 簽署完成 Modal 按鈕文字，空白則隱藏按鈕
+    - ajax_signed_btn_link (string): 簽署完成 Modal 按鈕連結
+    --- Woocommerce 分頁（需 WooCommerce 啟用）---
+    - display_order_info (bool): 是否自動帶入訂單資訊至合約欄位
+    - display_contract_before_checkout (bool): 結帳前重導向至合約
+    - display_contract_after_checkout (bool): 結帳後、感謝頁前重導向至合約
+    - chosen_contract_template (string): 結帳流程使用的合約模板 ID
+    --- Email 分頁 ---
+    - emails (string[]): 合約簽署後通知信收件人列表，支援多個 email
+  '''
+}
+
+// Relationships
+Ref: contract_template_meta.post_id > contract_template.ID
+Ref: contract_meta.post_id > contract.ID
+// contract_meta.meta_value 中 meta_key='contract_template_id' 對應 contract_template.ID（邏輯外鍵）
+// contract_meta.meta_value 中 meta_key='_order_id' 對應 WooCommerce wc_orders.id（邏輯外鍵，跨外掛）

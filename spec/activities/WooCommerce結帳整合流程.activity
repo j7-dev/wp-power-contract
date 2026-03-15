@@ -1,0 +1,19 @@
+[ACTIVITY] WooCommerce結帳整合流程
+
+[ACTOR] Customer -> {specs/actors/Customer.md}
+[ACTOR] WooCommerce -> {specs/actors/WooCommerce.md}
+[ACTOR] System -> {specs/actors/System.md}
+
+[DECISION:1a] 結帳前是否需要簽約？
+  [BRANCH:1a:需要] @WooCommerce {features/woocommerce/結帳前重導向至合約.feature}
+  [BRANCH:1a:不需要] @Customer {specs/ui/正常結帳頁面.md}
+[MERGE:1a]
+
+[STEP:1] @Customer {features/contract/建立合約.feature}
+
+[DECISION:2a] 結帳後感謝頁前是否需要簽約？
+  [BRANCH:2a:需要] @WooCommerce {features/woocommerce/感謝頁前重導向至合約.feature}
+  [BRANCH:2a:不需要] @Customer {specs/ui/正常感謝頁.md}
+[MERGE:2a]
+
+[END]

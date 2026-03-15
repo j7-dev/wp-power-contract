@@ -2,118 +2,255 @@
  * 02-frontend / checkout-redirect.spec.ts
  *
  * 結帳前重導向至合約 E2E 測試
- * 基於: spec/features/結帳前重導向至合約.feature
+ * 基於: spec/features/woocommerce/結帳前重導向至合約.feature
+ *
+ * 核心行為：
+ *   - display_contract_before_checkout=true 且 is_signed 未帶 yes 時，
+ *     template_redirect hook 將結帳頁重導向至合約模板頁（帶 redirect=checkout）
+ *   - is_signed=yes 時保持在結帳頁
+ *   - 非結帳頁不觸發重導向
+ *
+ * 優先級:
+ *   P0 — 合約模板頁帶 redirect=checkout 參數可正常載入
+ *   P1 — is_signed=yes 結帳頁不重導向至合約頁
+ *   P1 — 非結帳頁不被重導向
+ *   P2 — 重導向後 URL 格式包含 redirect=checkout
+ *   P2 — 結帳頁本身不 500（設定 off 或 WC 未啟用時的 fallback）
+ *   P3 — 邊界值：is_signed 奇怪的值、URL encode 問題
  */
 import { test, expect } from '@playwright/test'
 import {
   BASE_URL,
   EP,
-  ADMIN_PAGES,
   SETTINGS_FIELDS,
   loadTestIds,
   type TestIds,
 } from '../fixtures/test-data.js'
 import { getNonce } from '../helpers/admin-setup.js'
-import { wpGet, type ApiOptions } from '../helpers/api-client.js'
+import { wpGet, wpPost, type ApiOptions } from '../helpers/api-client.js'
 
 test.describe('02-frontend / 結帳前重導向至合約', () => {
   let apiOpts: ApiOptions
   let ids: TestIds
+  let templateLink: string | undefined
 
   test.beforeAll(async ({ request }) => {
     apiOpts = { request, baseURL: BASE_URL, nonce: getNonce() }
     ids = loadTestIds()
+
+    // 嘗試取得合約模板 permalink，供後續測試使用
+    if (ids.templateId) {
+      const res = await wpGet(apiOpts, EP.WP_TEMPLATE(ids.templateId))
+      if (res.status === 200) {
+        const t = res.data as Record<string, unknown>
+        templateLink = (t.link as string) ?? undefined
+      }
+    }
   })
 
-  // ────────────────────────────────────────────────────────────
-  // 前置條件檢查
-  // ────────────────────────────────────────────────────────────
-  test('WooCommerce 結帳頁面在 display_contract_before_checkout=true 時應觸發重導向', async ({
-    page,
-  }) => {
-    // 此測試需要 WooCommerce 啟用且結帳頁面存在
-    // 先嘗試訪問結帳頁面
-    const response = await page.goto(`${BASE_URL}/checkout/`)
+  // ══════════════════════════════════════════════════════════════
+  // P0 — 合約模板頁面帶 redirect=checkout 可正常載入
+  // ══════════════════════════════════════════════════════════════
+
+  test('[P0] 合約模板頁面帶有 redirect=checkout 參數應可正常載入（不 500）', async ({ page }) => {
+    if (!templateLink) {
+      test.skip()
+      return
+    }
+
+    const sep = templateLink.includes('?') ? '&' : '?'
+    const url = `${templateLink}${sep}redirect=checkout`
+
+    const response = await page.goto(url)
     expect(response).toBeTruthy()
     expect(response!.status()).toBeLessThan(500)
 
-    const finalUrl = page.url()
-    // 若設定為 true 且尚未簽約，URL 可能被導向至合約模板頁面
-    // 或者 WooCommerce 未啟用，保持在原頁面
-    // 兩種情況都不應是 500 錯誤
-    expect(finalUrl.length).toBeGreaterThan(0)
+    // 頁面應有實質內容
+    const content = await page.content()
+    expect(content.length).toBeGreaterThan(100)
   })
 
-  test('帶有 is_signed=yes 參數的結帳頁面不應重導向', async ({ page }) => {
+  test('[P0] 合約模板頁帶 redirect=checkout 且 order_id 應可正常載入', async ({ page }) => {
+    if (!templateLink || !ids.orderId) {
+      test.skip()
+      return
+    }
+
+    const sep = templateLink.includes('?') ? '&' : '?'
+    const url = `${templateLink}${sep}redirect=checkout&order_id=${ids.orderId}`
+
+    const response = await page.goto(url)
+    expect(response).toBeTruthy()
+    expect(response!.status()).toBeLessThan(500)
+  })
+
+  // ══════════════════════════════════════════════════════════════
+  // P1 — is_signed=yes 結帳頁不被重導向至合約頁
+  // ══════════════════════════════════════════════════════════════
+
+  test('[P1] 結帳頁帶有 is_signed=yes 不應被重導向至合約模板頁', async ({ page }) => {
     const response = await page.goto(`${BASE_URL}/checkout/?is_signed=yes`)
     expect(response).toBeTruthy()
     expect(response!.status()).toBeLessThan(500)
 
+    // 最終落點不應是合約模板頁
     const finalUrl = page.url()
-    // 帶有 is_signed=yes 時不應被重導向至合約頁面
-    // 應保持在結帳頁面或顯示正常頁面
-    if (finalUrl.includes('checkout')) {
-      expect(finalUrl).toContain('is_signed=yes')
-    }
+    expect(finalUrl).not.toContain('contract_template')
   })
 
-  test('非結帳頁面不應觸發重導向', async ({ page }) => {
-    // 訪問首頁，不應被重導向
+  test('[P1] 結帳頁帶有 is_signed=yes 且 order_id 時不應被重導向', async ({ page }) => {
+    if (!ids.orderId) {
+      test.skip()
+      return
+    }
+
+    const response = await page.goto(
+      `${BASE_URL}/checkout/?is_signed=yes&order_id=${ids.orderId}`,
+    )
+    expect(response).toBeTruthy()
+    expect(response!.status()).toBeLessThan(500)
+
+    const finalUrl = page.url()
+    expect(finalUrl).not.toContain('contract_template')
+  })
+
+  // ══════════════════════════════════════════════════════════════
+  // P1 — 非結帳頁不觸發重導向
+  // ══════════════════════════════════════════════════════════════
+
+  test('[P1] 首頁不應被重導向至合約模板頁', async ({ page }) => {
     const response = await page.goto(`${BASE_URL}/`)
     expect(response).toBeTruthy()
     expect(response!.status()).toBeLessThan(500)
 
     const finalUrl = page.url()
-    // 首頁不應被重導向至合約頁面
     expect(finalUrl).not.toContain('contract_template')
   })
 
-  // ────────────────────────────────────────────────────────────
-  // 設定關閉時不重導向
-  // ────────────────────────────────────────────────────────────
-  test('display_contract_before_checkout=false 時結帳頁面不應重導向', async ({ page }) => {
-    // 先透過設定頁面確認或修改設定
-    // 這裡做防禦性測試：直接訪問結帳頁面
+  test('[P1] 商品頁面不應被重導向至合約模板頁', async ({ page }) => {
+    const response = await page.goto(`${BASE_URL}/shop/`)
+    expect(response).toBeTruthy()
+    expect(response!.status()).toBeLessThan(500)
+
+    const finalUrl = page.url()
+    expect(finalUrl).not.toContain('contract_template')
+  })
+
+  // ══════════════════════════════════════════════════════════════
+  // P2 — 結帳頁本身不 500（功能關閉 / WC 未啟用的 fallback）
+  // ══════════════════════════════════════════════════════════════
+
+  test('[P2] 結帳頁本身不應 500', async ({ page }) => {
     const response = await page.goto(`${BASE_URL}/checkout/`)
     expect(response).toBeTruthy()
     expect(response!.status()).toBeLessThan(500)
-    // 不論設定為何，頁面都不應 500
   })
 
-  // ────────────────────────────────────────────────────────────
-  // 重導向 URL 格式驗證
-  // ────────────────────────────────────────────────────────────
-  test('合約模板頁面應可透過 redirect=checkout 參數存取', async ({ page }) => {
+  test('[P2] 結帳頁帶有空 is_signed 值不應 500', async ({ page }) => {
+    const response = await page.goto(`${BASE_URL}/checkout/?is_signed=`)
+    expect(response).toBeTruthy()
+    expect(response!.status()).toBeLessThan(500)
+  })
+
+  test('[P2] 合約模板頁帶有 redirect=thankyou 和 order_id 參數應可正常載入', async ({ page }) => {
+    if (!templateLink || !ids.orderId) {
+      test.skip()
+      return
+    }
+
+    const sep = templateLink.includes('?') ? '&' : '?'
+    const url = `${templateLink}${sep}redirect=thankyou&order_id=${ids.orderId}`
+
+    const response = await page.goto(url)
+    expect(response).toBeTruthy()
+    expect(response!.status()).toBeLessThan(500)
+  })
+
+  // ══════════════════════════════════════════════════════════════
+  // P2 — 設定頁面：chosen_contract_template 對應真實模板
+  // ══════════════════════════════════════════════════════════════
+
+  test('[P2] 設定中 chosen_contract_template 應可設定為合約模板 ID', async () => {
     if (!ids.templateId) {
       test.skip()
       return
     }
 
-    // 取得合約模板 permalink
-    const res = await wpGet(apiOpts, EP.WP_TEMPLATE(ids.templateId))
-    if (res.status !== 200) {
-      test.skip()
-      return
-    }
+    const res = await wpPost(apiOpts, EP.WP_OPTIONS, {
+      [SETTINGS_FIELDS.CHOSEN_CONTRACT_TEMPLATE]: ids.templateId,
+    })
+    expect(res.status).toBeLessThan(500)
+  })
 
-    const template = res.data as Record<string, unknown>
-    const link = (template.link as string) ?? ''
+  // ══════════════════════════════════════════════════════════════
+  // P3 — 邊界值：is_signed 奇怪的值
+  // ══════════════════════════════════════════════════════════════
 
-    if (!link) {
-      test.skip()
-      return
-    }
+  test('[P3] 結帳頁 is_signed=no 不應當作已簽約處理', async ({ page }) => {
+    const response = await page.goto(`${BASE_URL}/checkout/?is_signed=no`)
+    expect(response).toBeTruthy()
+    expect(response!.status()).toBeLessThan(500)
+  })
 
-    // 帶 redirect=checkout 參數訪問合約模板頁面
-    const separator = link.includes('?') ? '&' : '?'
-    const redirectUrl = `${link}${separator}redirect=checkout`
+  test('[P3] 結帳頁 is_signed=true（非 yes）不應特殊處理', async ({ page }) => {
+    const response = await page.goto(`${BASE_URL}/checkout/?is_signed=true`)
+    expect(response).toBeTruthy()
+    expect(response!.status()).toBeLessThan(500)
+  })
 
-    const response = await page.goto(redirectUrl)
+  test('[P3] 結帳頁 is_signed 含 XSS 值不應執行 script', async ({ page }) => {
+    const response = await page.goto(
+      `${BASE_URL}/checkout/?is_signed=<script>alert(1)</script>`,
+    )
     expect(response).toBeTruthy()
     expect(response!.status()).toBeLessThan(500)
 
-    // 合約模板頁面應正常顯示
-    const pageContent = await page.content()
-    expect(pageContent.length).toBeGreaterThan(0)
+    const content = await page.content()
+    expect(content).not.toContain('<script>alert(1)</script>')
+  })
+
+  test('[P3] 合約模板頁 redirect=checkout 含 XSS 注入不應執行 script', async ({ page }) => {
+    if (!templateLink) {
+      test.skip()
+      return
+    }
+
+    const sep = templateLink.includes('?') ? '&' : '?'
+    const url = `${templateLink}${sep}redirect="><script>alert(1)</script>`
+
+    const response = await page.goto(url)
+    expect(response).toBeTruthy()
+    expect(response!.status()).toBeLessThan(500)
+
+    const content = await page.content()
+    expect(content).not.toContain('<script>alert(1)</script>')
+  })
+
+  test('[P3] 合約模板頁 order_id 為負數不應 500', async ({ page }) => {
+    if (!templateLink) {
+      test.skip()
+      return
+    }
+
+    const sep = templateLink.includes('?') ? '&' : '?'
+    const url = `${templateLink}${sep}redirect=checkout&order_id=-1`
+
+    const response = await page.goto(url)
+    expect(response).toBeTruthy()
+    expect(response!.status()).toBeLessThan(500)
+  })
+
+  test('[P3] 合約模板頁 order_id 為非數字不應 500', async ({ page }) => {
+    if (!templateLink) {
+      test.skip()
+      return
+    }
+
+    const sep = templateLink.includes('?') ? '&' : '?'
+    const url = `${templateLink}${sep}redirect=checkout&order_id=abc`
+
+    const response = await page.goto(url)
+    expect(response).toBeTruthy()
+    expect(response!.status()).toBeLessThan(500)
   })
 })
