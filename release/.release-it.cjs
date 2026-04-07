@@ -39,10 +39,11 @@ module.exports = {
 		requireCleanWorkingDir: release,
 	},
 	hooks: {
-		// 'before:init': [], // run before initialization
+		'before:init': [
+			'pnpm build && echo ✅ build success'
+		], // run before initialization
 		// 'after:[my-plugin]:bump': './bin/my-script.sh', // run after bumping version of my-plugin
 		'after:bump': [
-			'pnpm build && echo ✅ build success',
 			release
 				? 'pnpm sync:version && echo ✅ sync version success'
 				: 'echo 🚫 skip sync version',
