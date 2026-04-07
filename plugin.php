@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:       Power Contract
- * Plugin URI:        https://github.com/j7-dev/wp-power-contract
+ * Plugin URI:        https://github.com/p9-cloud/wp-power-contract
  * Description:       WordPress 線上簽合約 & 審批 外掛
  * Version:           0.0.10
  * Requires at least: 5.7
@@ -41,7 +41,7 @@ final class Plugin {
 			[
 				'name'     => 'Powerhouse',
 				'slug'     => 'powerhouse',
-				'source'   => 'https://github.com/j7-dev/wp-powerhouse/releases/latest/download/powerhouse.zip',
+				'source'   => 'https://github.com/p9-cloud/wp-powerhouse/releases/latest/download/powerhouse.zip',
 				'version'  => '3.0.2',
 				'required' => true,
 			],
@@ -50,7 +50,7 @@ final class Plugin {
 		$this->init(
 		[
 			'app_name'     => 'Power Contract',
-			'github_repo'  => 'https://github.com/j7-dev/wp-power-contract',
+			'github_repo'  => 'https://github.com/p9-cloud/wp-power-contract',
 			'callback'     => [ Bootstrap::class, 'instance' ],
 			'lc'           => false,
 			'hide_submenu' => true,
