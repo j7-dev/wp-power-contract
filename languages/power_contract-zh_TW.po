@@ -84,7 +84,7 @@ msgid "https://github.com/j7-dev"
 msgstr ""
 
 #. URI of the plugin
-msgid "https://github.com/p9-cloud/wp-power-contract"
+msgid "https://github.com/zenbuapps/wp-power-contract"
 msgstr ""
 
 #: ../../../../../../test/app/public/wp-content/plugins/power-contract/inc/templates/pages/settings/index.php:40
