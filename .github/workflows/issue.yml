@@ -13,6 +13,7 @@ jobs:
     # 粗篩：body 包含 @claude 才進 job，精確關鍵字由 step 1 的 grep 判斷
     if: contains(github.event.issue.body, '@claude')
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
       issues: write
