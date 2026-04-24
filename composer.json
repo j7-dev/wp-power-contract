@@ -31,6 +31,11 @@
 	"require": {
 		"j7-dev/wp-plugin-trait": "0.2.10"
 	},
+	"autoload-dev": {
+		"psr-4": {
+			"Tests\\Integration\\": "tests/Integration/"
+		}
+	},
 	"require-dev": {
 		"squizlabs/php_codesniffer": "@stable",
 		"wp-coding-standards/wpcs": "@stable",
@@ -39,9 +44,14 @@
 		"phpstan/phpstan": "^1.11.9",
 		"php-stubs/woocommerce-stubs": "^9.1",
 		"php-stubs/wordpress-stubs": "^6.6",
-		"phpstan/extension-installer": "^1.4.1"
+		"phpstan/extension-installer": "^1.4.1",
+		"phpunit/phpunit": "^9.0",
+		"yoast/phpunit-polyfills": "^4.0",
+		"wp-phpunit/wp-phpunit": "^6.0"
 	},
 	"scripts": {
-		"lint": "phpcs"
+		"lint": "phpcs",
+		"test": "vendor/bin/phpunit --colors=always --testdox --verbose",
+		"test:coverage": "vendor/bin/phpunit --coverage-text"
 	}
 }
