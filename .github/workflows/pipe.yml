@@ -17,6 +17,8 @@ jobs:
     name: 釐清需求及開發
     if: |
       github.event.sender.type != 'Bot' &&
+      (github.event.comment.user.type == null || github.event.comment.user.type != 'Bot') &&
+      (github.event.review.user.type == null || github.event.review.user.type != 'Bot') &&
       (
         (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
         (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||

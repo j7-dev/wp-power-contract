@@ -1,0 +1,124 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build & Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PLUGIN_SLUG: power-contract
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 取得 tag 版本號
+        id: version
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          VERSION="${TAG#v}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Tag: $TAG / Version: $VERSION"
+
+      - name: 設定 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 設定 pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: 設定 PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer
+
+      - name: 安裝 Node 依賴
+        run: pnpm install --frozen-lockfile
+
+      - name: 安裝 Composer 依賴（prod only, no dev）
+        run: composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: 建置前端
+        run: pnpm run build
+
+      - name: 打包 Plugin Zip
+        id: zip
+        run: |
+          PLUGIN_SLUG="${{ env.PLUGIN_SLUG }}"
+          VERSION="${{ steps.version.outputs.version }}"
+          ZIP_NAME="${PLUGIN_SLUG}-${VERSION}.zip"
+          STAGE_DIR="/tmp/${PLUGIN_SLUG}"
+
+          mkdir -p "$STAGE_DIR"
+
+          # 複製必要檔案（排除開發資產）
+          rsync -av \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='node_modules' \
+            --exclude='tests' \
+            --exclude='specs' \
+            --exclude='stubs' \
+            --exclude='release' \
+            --exclude='.claude' \
+            --exclude='.vscode' \
+            --exclude='.idea' \
+            --exclude='.env*' \
+            --exclude='*.log' \
+            --exclude='phpcs.xml' \
+            --exclude='phpmd.xml' \
+            --exclude='phpstan.neon' \
+            --exclude='phpunit.xml.dist' \
+            --exclude='vite.config.ts' \
+            --exclude='tsconfig*.json' \
+            --exclude='postcss.config.cjs' \
+            --exclude='tailwind.config.cjs' \
+            --exclude='package.json' \
+            --exclude='pnpm-lock.yaml' \
+            --exclude='composer.json' \
+            --exclude='composer.lock' \
+            --exclude='js/src' \
+            --exclude='*.zip' \
+            ./ "$STAGE_DIR/"
+
+          # 進入 /tmp 建立 zip（zip 根目錄為 plugin slug）
+          cd /tmp
+          zip -rq "$ZIP_NAME" "$PLUGIN_SLUG"
+
+          mv "/tmp/$ZIP_NAME" "$GITHUB_WORKSPACE/$ZIP_NAME"
+          echo "zip_path=$GITHUB_WORKSPACE/$ZIP_NAME" >> "$GITHUB_OUTPUT"
+          echo "zip_name=$ZIP_NAME" >> "$GITHUB_OUTPUT"
+          ls -lh "$GITHUB_WORKSPACE/$ZIP_NAME"
+
+      - name: 上傳 Artifact（CI 診斷用）
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.zip.outputs.zip_name }}
+          path: ${{ steps.zip.outputs.zip_path }}
+          retention-days: 14
+
+      - name: 建立 GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ${{ steps.version.outputs.tag }}
+          generate_release_notes: true
+          files: ${{ steps.zip.outputs.zip_path }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

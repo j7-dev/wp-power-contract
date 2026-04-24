@@ -18,9 +18,16 @@ name: Act Test (Multi-Job Structure Validation)
 
 on:
   workflow_dispatch:
+    inputs:
+      confirm_local_only:
+        description: '⚠️ LOCAL-ONLY: 確認這是本地 act 測試（輸入 "yes" 才會執行）'
+        required: true
+        default: 'no'
+        type: string
 
 jobs:
   integration-tests:
+    if: ${{ inputs.confirm_local_only == 'yes' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -29,7 +36,7 @@ jobs:
       phpunit_ok: ${{ steps.mock_phpunit.outcome }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: 設定 Node.js
         uses: actions/setup-node@v4
@@ -42,10 +49,11 @@ jobs:
       - name: 安裝 Node 依賴
         run: pnpm install
 
-      - name: 安裝 PHP + Composer（act image 未預裝）
+      - name: 安裝 Composer（act image 已內建 PHP）
         run: |
-          apt-get update -qq && apt-get install -y -qq php-cli php-xml php-mbstring php-curl unzip > /dev/null 2>&1
+          # catthehacker/ubuntu:act-latest 已預裝 PHP，僅需安裝 Composer
           curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+          php --version
           composer --version
 
       - name: 安裝 Composer 依賴
@@ -89,7 +97,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: 設定 Node.js
         uses: actions/setup-node@v4
@@ -102,10 +110,11 @@ jobs:
       - name: 安裝 Node 依賴
         run: pnpm install
 
-      - name: 安裝 PHP + Composer（act image 未預裝）
+      - name: 安裝 Composer（act image 已內建 PHP）
         run: |
-          apt-get update -qq && apt-get install -y -qq php-cli php-xml php-mbstring php-curl unzip > /dev/null 2>&1
+          # catthehacker/ubuntu:act-latest 已預裝 PHP，僅需安裝 Composer
           curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+          php --version
           composer --version
 
       - name: 安裝 Composer 依賴（主機端）
