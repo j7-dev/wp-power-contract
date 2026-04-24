@@ -18,5 +18,4 @@ Clarifier 已完成需求釐清，Planner 已制定實作計畫。
 - 遇到問題時自行判斷最佳解法，不要停下來等用戶確認
 - 動態組裝你需要的 agent team（使用 Agent tool），根據規格內容決定：
   - PHP 後端：使用 aibdd.auto.php.it.* skills
-  - TypeScript API：使用 aibdd.auto.typescript.api.* skills
-  - 前端 E2E：使用 aibdd.auto.typescript.e2e.* skills
+  - 前端（jQuery + TypeScript）：使用對應的前端實作 skill

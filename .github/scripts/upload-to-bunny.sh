@@ -4,16 +4,20 @@
 #
 # Required env vars: BUNNY_STORAGE_HOST, BUNNY_STORAGE_ZONE,
 #                    BUNNY_STORAGE_PASSWORD, BUNNY_CDN_URL
-# Outputs to $GITHUB_OUTPUT: screenshot_files, video_files, media_url_prefix, has_media
+# Outputs to $GITHUB_OUTPUT: screenshot_files, video_files, media_url_prefix, has_media, upload_ok
+#   - has_media:  來源目錄中是否存在可上傳的檔案（true/false）
+#   - upload_ok:  所有檔案是否皆上傳成功（true/false）
 
 set -euo pipefail
 
 SOURCE_DIR="$1"
 MEDIA_PREFIX="$2"
 UPLOAD_OK=true
+HAS_MEDIA=false
 
 for file in "${SOURCE_DIR}"/*; do
   [ -f "$file" ] || continue
+  HAS_MEDIA=true
   filename=$(basename "$file")
   HTTP_CODE=$(curl --fail --silent --output /dev/null --write-out "%{http_code}" \
     --request PUT \
@@ -35,4 +39,5 @@ VIDEO_FILES=$(ls "${SOURCE_DIR}"/*.webm 2>/dev/null | xargs -I{} basename {} | t
 echo "screenshot_files=${SCREENSHOT_FILES}" >> "$GITHUB_OUTPUT"
 echo "video_files=${VIDEO_FILES}" >> "$GITHUB_OUTPUT"
 echo "media_url_prefix=${BUNNY_CDN_URL}/${MEDIA_PREFIX}" >> "$GITHUB_OUTPUT"
-echo "has_media=${UPLOAD_OK}" >> "$GITHUB_OUTPUT"
+echo "has_media=${HAS_MEDIA}" >> "$GITHUB_OUTPUT"
+echo "upload_ok=${UPLOAD_OK}" >> "$GITHUB_OUTPUT"
