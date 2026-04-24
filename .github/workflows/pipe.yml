@@ -542,6 +542,8 @@ jobs:
 
       - name: 設定 pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 10
 
       - name: 安裝 Node 依賴
         run: pnpm install
@@ -613,17 +615,16 @@ jobs:
         id: claude_fix_1
         if: steps.test_cycle_1.outcome == 'failure'
         continue-on-error: true
-        uses: anthropics/claude-code-action@v1
+        uses: ./.github/actions/claude-retry
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-
-          additional_permissions: |
-            actions: read
           settings: .claude/settings.json
           plugin_marketplaces: |
             https://github.com/j7-dev/wp-workflows.git
           plugins: |
             wp-workflows@wp-workflows
+          max_turns: '60'
+          model: opus
           prompt: |
             PHPUnit 整合測試失敗了。請根據以下測試輸出修復程式碼。
 
@@ -638,10 +639,6 @@ jobs:
             3. 如果問題出在測試基礎類別（tests/Integration/TestCase.php）或測試 setUp/helper，也可以修改
             4. 如果問題是環境或權限問題（如 uploads 目錄不可寫），可修改 .wp-env.json 或測試 bootstrap
             5. 修復後請 commit 變更
-          claude_args: |
-            --dangerously-skip-permissions
-            --max-turns 60
-            --model opus
 
       # ── 測試循環 2/3 ─────────────────────────────────
       - name: "PHPUnit 測試 (cycle 2/3)"
@@ -666,17 +663,16 @@ jobs:
         id: claude_fix_2
         if: steps.test_cycle_2.outcome == 'failure'
         continue-on-error: true
-        uses: anthropics/claude-code-action@v1
+        uses: ./.github/actions/claude-retry
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-
-          additional_permissions: |
-            actions: read
           settings: .claude/settings.json
           plugin_marketplaces: |
             https://github.com/j7-dev/wp-workflows.git
           plugins: |
             wp-workflows@wp-workflows
+          max_turns: '60'
+          model: opus
           prompt: |
             PHPUnit 整合測試第二次仍然失敗。請更仔細分析根本原因並修復。
 
@@ -692,10 +688,6 @@ jobs:
             4. 如果問題是環境或權限問題（如 uploads 目錄不可寫），可修改 .wp-env.json 或測試 bootstrap
             5. 如果前一次修復方向錯誤，請大膽回退（git revert）並嘗試完全不同的方向
             6. 修復後請 commit 變更
-          claude_args: |
-            --dangerously-skip-permissions
-            --max-turns 60
-            --model opus
 
       # ── 測試循環 3/3（最終測試，無修復）───────────────
       - name: "PHPUnit 測試 (cycle 3/3 - final)"

@@ -13,8 +13,9 @@
 ├── workflows/
 │   ├── pipe.yml          # 主 pipeline（@claude 觸發）
 │   ├── pipe.md           # pipe.yml 的中文規格書（必讀）
-│   ├── issue.yml         # Issue 開啟/編輯時自動展開需求（@claude 展開 / dev / 工程）
-│   └── act-test.yml      # 本地 act 工具測試用，不發布
+│   └── issue.yml         # Issue 開啟/編輯時自動展開需求（@claude 展開 / dev / 工程）
+├── act/
+│   └── test.yml          # 本地 act 工具測試用，已移出 workflows 避免線上誤觸發
 ├── actions/
 │   └── claude-retry/
 │       └── action.yml    # claude-code-action 3 次重試包裝（30s / 60s backoff）
@@ -89,14 +90,14 @@ H wp-env start（3 retries）→ I PHPUnit 3 循環（test→fix→test→fix→
 ```bash
 # Windows PowerShell
 mkdir -p "$env:TEMP/act-artifacts"
-act workflow_dispatch -W .github/workflows/act-test.yml `
+act workflow_dispatch -W .github/act/test.yml `
   --container-architecture linux/amd64 `
   -P ubuntu-latest=catthehacker/ubuntu:act-latest `
   --container-options "--privileged" `
   --artifact-server-path "C:/Users/$env:USERNAME/AppData/Local/Temp/act-artifacts"
 ```
 
-`act-test.yml` mock 掉 wp-env / Claude Code，只驗多 job 結構與 artifact 跨 job 傳遞。
+`.github/act/test.yml` mock 掉 wp-env / Claude Code，只驗多 job 結構與 artifact 跨 job 傳遞。
 
 ---
 
