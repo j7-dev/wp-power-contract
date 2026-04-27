@@ -9,12 +9,12 @@ Clarifier 已完成需求釐清，Planner 已制定實作計畫。
    - 先寫測試（使用對應的 aibdd skill）
    - 再寫生產程式碼讓測試通過
    - 重構
-4. 所有變更 commit 到當前分支
+4. 所有變更 commit 到當前分支（commit message 必須使用繁體中文）
 5. 使用 `gh issue comment {{ISSUE_NUM}} --body "..."` 回報每個階段的進度
 
 ### 重要規則
 - 在 CI 環境中直接在當前分支工作
-- 每個有意義的實作步驟都要 commit
+- 每個有意義的實作步驟都要 commit（commit message 必須使用繁體中文）
 - 遇到問題時自行判斷最佳解法，不要停下來等用戶確認
 - 動態組裝你需要的 agent team（使用 Agent tool），根據規格內容決定：
   - PHP 後端：使用 aibdd.auto.php.it.* skills
